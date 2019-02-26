@@ -1,0 +1,9 @@
+# Change Log 
+
+## 0.0.1
+* Alpha version
+* Basic rendering of mesh objects with textures in world space
+* Able to translate, scale, and rotate objects. 
+* Very basic collision detection between player and crates, and player and asteroids
+* Optimized all asteroid/crate objects to batch draw so that buffer data does not need to be changed
+* Basic music and sound effects for pickup and collision
