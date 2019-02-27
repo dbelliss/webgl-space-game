@@ -17,16 +17,7 @@ class Game {
     }
 
     constructor(asteroidJson, rocketJson) {
-        var music = document.getElementById("music");
-        var pickup = document.getElementById("pickup");
-        var crash = document.getElementById("crash");
-        var playPromise = music.play()
-
-        if (playPromise !== null){
-            playPromise.catch(() => {
-                console.error("Could not payback music");
-            })
-        }
+        this.initializeAudio();
 
         // Create WebGL object
         var canvas = document.getElementById('game-surface');
@@ -127,12 +118,7 @@ class Game {
                 var crate = this.crates[i];
                 if (crate.transform.position.distance(this.player.transform.position) < 3) {
                     console.log("Crate!")
-                    var pickupPromise = pickup.play()
-                    if (pickupPromise !== null){
-                        pickupPromise.catch(() => {
-                            console.error("Could not playback pickup");
-                        })
-                    }
+                    this.audioManager.playSound(SoundsEnum.PICKUP);
                     this.crates.splice(i,1);
                 }
                 if (i < this.crates.length/3) {
@@ -147,13 +133,9 @@ class Game {
             }
             for (var i = 0; i < this.asteroids.length; i++) {
                 var asteroid = this.asteroids[i]
-                if (asteroid.transform.position.distance(this.player.transform.position) < 5) {
-                    var crashPromise = crash.play()
-                    if (crashPromise !== null){
-                        crashPromise.catch(() => {
-                            console.error("Could not playback crash");
-                        })
-                    }
+                if (asteroid.transform.position.distance(this.player.transform.position) < 5 && this.player.iFrames <= 0) {
+                    this.player.iFrames = 100
+                    this.audioManager.playSound(SoundsEnum.CRASH);
                     console.log("Hit by asteroid")
                 }
                 if (i < this.asteroids.length/3) {
@@ -170,6 +152,23 @@ class Game {
             updateNum++;
             await this.sleep(1000/60);
         }
+    }
+
+    initializeAudio() {
+        var audioManager = new AudioManager();
+        this.audioManager = audioManager
+        this.audioManager.playSong(SongsEnum.FREEFORM)
+        const volumeInput = document.getElementById("musicVolumeSlider");
+
+        volumeInput.addEventListener('mouseup', function() {
+            audioManager.setMusicVolume(this.value/100)
+        });
+
+        const sfxInput = document.getElementById("sfxVolumeSlider");
+
+        sfxInput.addEventListener('mouseup', function() {
+            audioManager.setSFXVolume(this.value/100)
+        });
     }
 
     createAsteroids(numAsteroids, asteroidJson) {
@@ -214,18 +213,13 @@ class Game {
     createCrates(numCrates) {
         console.log("Creating crates");
         for (var i = 0; i < numCrates; i++) {
-            var crate = new Cube("crate" + i, Vector3.random(-500, 500), this.textureLoader.getTexture("crate"))
+            var crate = new Cube("crate" + i, Vector3.random(-300, 300), this.textureLoader.getTexture("crate"))
             crate.transform.rotation.x = Math.random() * 360
             crate.transform.rotation.y = Math.random() * 360
             crate.transform.rotation.z = Math.random() * 360
             this.crates.push(crate);
             this.addGameObject(crate);
         }
-
-        var crate = new Cube("crate" + i, Vector3.random(-500, 500), this.textureLoader.getTexture("crate"))
-        crate.transform.position = new Vector3(5,0,0)
-                    this.crates.push(crate);
-            this.addGameObject(crate);
     }
 
     addGameObject(gameObject) {
