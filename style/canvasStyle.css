@@ -1,0 +1,24 @@
+.canvases {
+    position: relative;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    height: 800px;
+    width: 800px;
+}
+
+canvas {
+    position: absolute;
+    left: 0%;
+    top: 0;
+}
+
+.canvas3d {
+    z-index: 0;
+}
+
+.canvas2d {
+    z-index: 2;
+}
+

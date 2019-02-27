@@ -3,8 +3,9 @@
 A repository for a simple game in WebGL
 
 ## Tools
-http://glmatrix.net/
-https://github.com/madrobby/keymaster
+* http://glmatrix.net/
+* https://github.com/madrobby/keymaster
+* https://realfavicongenerator.net/
 
 ## References:
 * http://learnwebgl.brown37.net/index.html
@@ -20,3 +21,4 @@ https://github.com/madrobby/keymaster
 * https://freesound.org/people/qubodup/sounds/151624/
 * https://www.shutterstock.com/image-illustration/seamless-texture-surface-moon-269082104
 * https://freesound.org/people/bubaproducer/sounds/151022/
+* https://www.dafont.com/nasalization.font

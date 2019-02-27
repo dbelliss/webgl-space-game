@@ -1,0 +1,12 @@
+@font-face {
+    font-family: 'Nasalization';
+    src: url("../fonts/nasalization-rg.ttf");
+}
+
+h1 {
+  font-family: "Nasalization", Times, serif;
+}
+
+p {
+  font-family: "Nasalization", Times, serif;
+}
