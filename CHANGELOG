@@ -15,3 +15,7 @@
 * Volume sliders for music and sfx
 * Music loops automatically
 * Player now gets 100 invincibility frames after collision
+
+## 0.0.3
+* Player can shoot lasers
+* Enemy rockets can be created, but do not move
