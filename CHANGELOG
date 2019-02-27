@@ -7,3 +7,11 @@
 * Very basic collision detection between player and crates, and player and asteroids
 * Optimized all asteroid/crate objects to batch draw so that buffer data does not need to be changed
 * Basic music and sound effects for pickup and collision
+
+
+## 0.0.2
+* Updating asteroid texture
+* Dedicated AudioManager
+* Volume sliders for music and sfx
+* Music loops automatically
+* Player now gets 100 invincibility frames after collision
