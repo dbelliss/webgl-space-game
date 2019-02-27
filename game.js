@@ -18,9 +18,57 @@ class Game {
         this.projMatrix = new Float32Array(16);
     }
 
+    loadHUD() {
+
+        var canvas2d = document.getElementById('hud');
+        var context = canvas2d.getContext('2d');
+        this.context2dCtx = context;
+
+
+        this.numCratesCollected = 0
+        this.numAsteroidsCollidedWith = 0
+
+        this.updateHUD()
+    }
+
+    updateHUD() {
+        console.log("Updating HUD");
+        var crateImage = new Image();
+        crateImage.src = 'Assets/crate.png';
+        var context2dCtx = this.context2dCtx;
+        crateImage.onload = function() {
+            context2dCtx.drawImage(crateImage, 20, 20, 50, 50);
+        }
+
+        var asteroidImage = new Image();
+        asteroidImage.src = 'Assets/rocky-texture.jpg';
+        asteroidImage.onload = function() {
+            context2dCtx.drawImage(asteroidImage, 20, 75, 50, 50);
+        }
+
+        context2dCtx.font = "40px Nasalization";
+        context2dCtx.fillStyle = "white";
+        context2dCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight );
+        context2dCtx.textAlign = "left";
+        context2dCtx.fillText("x" + this.numCratesCollected, 80, 55);
+        context2dCtx.fillText("x" + this.numAsteroidsCollidedWith, 80, 110);
+
+        context2dCtx.textAlign = "right";
+        context2dCtx.fillText("Score: " + this.calculateScore(), 750, 55);
+    }
+
+    calculateScore() {
+        var score = 0
+        score += this.numCratesCollected * 50
+        score -= this.numAsteroidsCollidedWith * 20
+        return score
+    }
+
     constructor(asteroidJson, rocketJson, laserJson) {
         this.laserJson = laserJson;
         this.fieldSize = 300
+        this.canvasHeight = 800;
+        this.canvasWidth = 800;
         window.onkeydown = function(e) {
             return !(e.keyCode == 32);
         };
@@ -35,6 +83,10 @@ class Game {
             console.error('Could not initialize WebGL');
             return;
         }
+
+
+        this.loadHUD();
+
         var gl = this.gl  // Shorter name
         clearGL(gl)
 
@@ -162,6 +214,8 @@ class Game {
                 var crate = this.crates[i];
                 if (crate.transform.position.distance(this.player.transform.position) < 3) {
                     console.log("Crate!")
+                    this.numCratesCollected += 1;
+                    this.updateHUD();
                     this.audioManager.playSound(SoundsEnum.PICKUP);
                     this.crates.splice(i,1);
                     //TODO: Remove from gameobject list
@@ -181,6 +235,8 @@ class Game {
                 if (asteroid.transform.position.distance(this.player.transform.position) < 1 && this.player.iFrames <= 0) {
                     this.player.iFrames = 1
                     this.audioManager.playSound(SoundsEnum.CRASH);
+                    this.numAsteroidsCollidedWith += 1;
+                    this.updateHUD();
                     console.log("Hit by asteroid")
                 }
                 if (i < this.asteroids.length/3) {
