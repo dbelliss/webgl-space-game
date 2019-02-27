@@ -4,7 +4,9 @@ function Initialize() {
 
     loadJSONResource('./Assets/Asteroid.json', function (modelErr, asteroidObj) {
         loadJSONResource('./Assets/rocket.json', function (modelErr, rocketObj) {
-            var game = new Game(asteroidObj, rocketObj);
+            loadJSONResource('./Assets/laser.json', function (modelErr, laserObj) {
+                var game = new Game(asteroidObj, rocketObj, laserObj);
+            });
         });
     });
 }
@@ -16,8 +18,9 @@ class Game {
         this.projMatrix = new Float32Array(16);
     }
 
-    constructor(asteroidJson, rocketJson) {
-
+    constructor(asteroidJson, rocketJson, laserJson) {
+        this.laserJson = laserJson;
+        this.fieldSize = 300
         window.onkeydown = function(e) {
             return !(e.keyCode == 32);
         };
@@ -56,10 +59,11 @@ class Game {
         this.crates = []
         this.asteroids = []
         this.enemies = []
+        this.lasers = []
         this.createPlayer(rocketJson);
-        this.createEnemies(1, rocketJson)
-        this.createAsteroids(1, asteroidJson)
-        this.createCrates(1)
+        this.createEnemies(0, rocketJson)
+        this.createAsteroids(1000, asteroidJson)
+        this.createCrates(1000)
         this.createWalls()
         this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
 
@@ -96,6 +100,15 @@ class Game {
                 }
             }
 
+
+            if (this.lasers.length > 0) {
+                var renderDataList = this.lasers[0].renderData
+                for (var j = 0; j < renderDataList.length; j++) {
+                    var renderData = renderDataList[j]
+                    this.textureProgram.batchDraw(this.lasers, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
+                }
+            }
+
             if (this.player) {
                 var gameObject = this.player
                 var renderDataList = gameObject.renderData
@@ -129,12 +142,29 @@ class Game {
                 gameObject.fixedUpdate(.02)
             })
 
+            if (InputManager.isKeyPressed("F") && this.player.curCoolDown < 0) {
+                this.audioManager.playSound(SoundsEnum.LASER);
+                var laserSpawnPoint = this.player.transform.position.copy();
+                laserSpawnPoint.add(this.player.moveDir.scaled(5));
+                this.createLaser(this.laserJson, laserSpawnPoint, this.player.transform.rotation.copy(), this.player.moveDir.copy());
+                this.player.curCoolDown = this.player.laserCoolDown;
+            }
+
+            for (var i = 0; i < this.lasers.length; i++) {
+                var laser = this.lasers[i]
+                if (laser.despawnTime <= 0) {
+                    this.lasers.splice(i,1);
+                    //TODO: Remove from gameobject list
+                }
+            }
+
             for (var i = 0; i < this.crates.length; i++) {
                 var crate = this.crates[i];
                 if (crate.transform.position.distance(this.player.transform.position) < 3) {
                     console.log("Crate!")
                     this.audioManager.playSound(SoundsEnum.PICKUP);
                     this.crates.splice(i,1);
+                    //TODO: Remove from gameobject list
                 }
                 if (i < this.crates.length/3) {
                     crate.transform.rotation.x = (crate.transform.rotation.x + 1) % 360
@@ -148,8 +178,8 @@ class Game {
             }
             for (var i = 0; i < this.asteroids.length; i++) {
                 var asteroid = this.asteroids[i]
-                if (asteroid.transform.position.distance(this.player.transform.position) < 5 && this.player.iFrames <= 0) {
-                    this.player.iFrames = 100
+                if (asteroid.transform.position.distance(this.player.transform.position) < 1 && this.player.iFrames <= 0) {
+                    this.player.iFrames = 1
                     this.audioManager.playSound(SoundsEnum.CRASH);
                     console.log("Hit by asteroid")
                 }
@@ -188,7 +218,10 @@ class Game {
 
     createAsteroids(numAsteroids, asteroidJson) {
         console.log("Creating asteroids");
-        var scales = [new Vector3(.1, .1, .1), new Vector3(.5, .2, .4), new Vector3(.1, .3, .2), new Vector3(.5, .5, .5), new Vector3(1, 1, 1)]
+        var scales = [new Vector3(.04, .05, .04)]
+        for (var i = 2; i < 10; i++) {
+            scales.push(scales[0].scaled(i));
+        }
         var renderData = []
         var texture = this.textureLoader.getTexture("rock")
         for (var i = 0; i < asteroidJson.meshes.length; i++) {
@@ -199,7 +232,7 @@ class Game {
         }
 
         for (var i = 0; i < numAsteroids; i++) {
-            var asteroid = new MeshObject("asteroid" + i, Vector3.random(-700, 700), renderData)
+            var asteroid = new MeshObject("asteroid" + i, Vector3.random(-this.fieldSize/2, this.fieldSize/2), renderData)
             asteroid.transform.scale = scales[Math.floor(scales.length * Math.random())]
             asteroid.transform.rotation.x = Math.random() * 360
             asteroid.transform.rotation.y = Math.random() * 360
@@ -208,6 +241,25 @@ class Game {
             this.asteroids.push(asteroid);
             this.addGameObject(asteroid);
         }
+    }
+
+    createLaser(laserJson, position, rotation, moveDir) {
+        console.log("Creating laser");
+        var renderData = []
+        var texture = this.textureLoader.getTexture("laser")
+        for (var i = 0; i < laserJson.meshes.length; i++) {
+            var vertices = laserJson.meshes[i].vertices
+            var indices = [].concat.apply([], laserJson.meshes[i].faces)
+            var textureVertices = laserJson.meshes[i].texturecoords[0]
+            renderData.push(new RenderData(texture, vertices, indices, textureVertices))
+        }
+        var laser = new Laser("Laser", position, renderData, moveDir);
+
+        laser.transform.rotation = rotation
+        laser.transform.scale.scale(.3)
+        laser.transform.scale.y *= 3
+        this.lasers.push(laser)
+        this.addGameObject(laser);
     }
 
     createPlayer(rocketJson) {
@@ -245,7 +297,7 @@ class Game {
     createCrates(numCrates) {
         console.log("Creating crates");
         for (var i = 0; i < numCrates; i++) {
-            var crate = new Cube("crate" + i, Vector3.random(-300, 300), this.textureLoader.getTexture("crate"))
+            var crate = new Cube("crate" + i, Vector3.random(-this.fieldSize/2, this.fieldSize/2), this.textureLoader.getTexture("crate"))
             crate.transform.rotation.x = Math.random() * 360
             crate.transform.rotation.y = Math.random() * 360
             crate.transform.rotation.z = Math.random() * 360
