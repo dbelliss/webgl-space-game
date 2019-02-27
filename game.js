@@ -17,6 +17,11 @@ class Game {
     }
 
     constructor(asteroidJson, rocketJson) {
+
+        window.onkeydown = function(e) {
+            return !(e.keyCode == 32);
+        };
+
         this.initializeAudio();
 
         // Create WebGL object
@@ -50,9 +55,11 @@ class Game {
         // Create GameObjects
         this.crates = []
         this.asteroids = []
+        this.enemies = []
         this.createPlayer(rocketJson);
-        this.createAsteroids(1000, asteroidJson)
-        this.createCrates(1000)
+        this.createEnemies(1, rocketJson)
+        this.createAsteroids(1, asteroidJson)
+        this.createCrates(1)
         this.createWalls()
         this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
 
@@ -79,6 +86,14 @@ class Game {
                 var renderDataList = this.crates[0].renderData
                 var renderData = renderDataList[0]
                 this.textureProgram.batchDraw(this.crates, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
+            }
+
+            if (this.enemies.length > 0) {
+                var renderDataList = this.enemies[0].renderData
+                for (var j = 0; j < renderDataList.length; j++) {
+                    var renderData = renderDataList[j]
+                    this.textureProgram.batchDraw(this.enemies, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
+                }
             }
 
             if (this.player) {
@@ -198,7 +213,7 @@ class Game {
     createPlayer(rocketJson) {
         console.log("Creating player");
         var renderData = []
-        var texture = this.textureLoader.getTexture("rocket")
+        var texture = this.textureLoader.getTexture("blueRocket")
         for (var i = 0; i < rocketJson.meshes.length; i++) {
             var vertices = rocketJson.meshes[i].vertices
             var indices = [].concat.apply([], rocketJson.meshes[i].faces)
@@ -208,6 +223,23 @@ class Game {
         this.player = new Player("Player", new Vector3(0,0,0), renderData);
         this.player.transform.scale.scale(.01)
         this.addGameObject(this.player);
+    }
+
+    createEnemies(numEnemies, rocketJson) {
+        var renderData = []
+        var texture = this.textureLoader.getTexture("redRocket")
+        for (var i = 0; i < rocketJson.meshes.length; i++) {
+            var vertices = rocketJson.meshes[i].vertices
+            var indices = [].concat.apply([], rocketJson.meshes[i].faces)
+            var textureVertices = rocketJson.meshes[i].texturecoords[0]
+            renderData.push(new RenderData(texture, vertices, indices, textureVertices))
+        }
+        for (var i = 0; i < numEnemies; i++) {
+            var enemy = new Rocket("Enemy " + i, new Vector3(0,i,0), renderData, this.player)
+            enemy.transform.scale.scale(.01);
+            this.enemies.push(enemy);
+            this.addGameObject(enemy);
+        }
     }
 
     createCrates(numCrates) {
