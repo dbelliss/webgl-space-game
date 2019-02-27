@@ -33,19 +33,21 @@
     <script src="./lib/util.js"></script>
     <script src="./lib/texture.js"></script>
     <script src="./lib/textureLoader.js"></script>
+    <script src="./lib/AudioManager.js"></script>
+    <script src="./lib/SoundsEnum.js"></script>
+    <script src="./lib/SongsEnum.js"></script>
 
+    <h1> Options </h1>
 
-  <audio id="music" controls>
-    <source src="./Assets/freeForm.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
-  <audio id="pickup">
-    <source src="./Assets/pickup.ogg" type="audio/ogg">
-    Your browser does not support the audio element.
-  </audio>
-  <audio id="crash">
-    <source src="./Assets/crash.wav" type="audio/wav">
-    Your browser does not support the audio element.
-  </audio>
+    <div class="volumeSettings">
+      <div class="musicSettings">
+        <p> Music Volume </p>
+        <input type="range" min="0" max="100" value="100" class="slider" id="musicVolumeSlider">
+      </div>
+      <div class="sfxSettings">
+        <p> SFX Volume </p>
+        <input type="range" min="0" max="100" value="100" class="slider" id="sfxVolumeSlider">
+      </div>
+    </div>
   </body>
 </html>
