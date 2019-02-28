@@ -3,10 +3,6 @@
     src: url("../fonts/nasalization-rg.ttf");
 }
 
-h1 {
-  font-family: "Nasalization", Times, serif;
-}
-
-p {
+h1,p,ul,li {
   font-family: "Nasalization", Times, serif;
 }

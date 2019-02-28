@@ -6,6 +6,7 @@
 class Crate extends GameObject{
     constructor(_name, position, texture, deltaRotation) {
         super(_name, position);
+        this.tag = "Crate"
         var box = this.generateTexturedBox();
         this.renderData = [new RenderData(texture, box[0], box[2], box[1])]
         this.transform.position = position;
@@ -15,6 +16,14 @@ class Crate extends GameObject{
         this.transform.rotation.x = Math.random() * 360;
         this.transform.rotation.y = Math.random() * 360;
         this.transform.rotation.z = Math.random() * 360;
+    }
+
+    onCollisionEnter(other) {
+        if (other.tag == "Player") {
+            this.isDestroyed = true
+            console.log("Crate!");
+            Game.instance.crateCollected()
+        }
     }
 
 

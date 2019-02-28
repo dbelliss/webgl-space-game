@@ -6,6 +6,7 @@
     margin-right: auto;
     height: 800px;
     width: 1000px;
+    background-color: white;
 }
 
 canvas {
@@ -22,3 +23,20 @@ canvas {
     z-index: 2;
 }
 
+body {background-color: black;}
+
+#gameInfo, p {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center
+}
+
+h1, p, li {
+    color: white;
+}
+
+ul {
+  list-style-type: none;
+}

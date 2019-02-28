@@ -70,7 +70,14 @@ class Game {
         return score
     }
 
+    crateCollected() {
+        this.numCratesCollected += 1;
+        this.updateHUD();
+        this.audioManager.playSound(SoundsEnum.PICKUP);
+    }
+
     constructor(asteroidJson, rocketJson, laserJson) {
+        Game.instance = this
         this.laserJson = laserJson;
         this.fieldSize = 300
         this.canvasHeight = 800;
@@ -104,20 +111,17 @@ class Game {
 
         // Load the program that WebGL will use
         this.textureProgram = new TextureProgram(gl, this.worldMatrix, this.viewMatrix, this.projMatrix, this.canvas.clientWidth / this.canvas.clientHeight)
-
-        // Load renderer
-        this.renderer = new Renderer(this.gl, this.textureLoader, this.textureProgram);
-
         this.gl.useProgram(this.textureProgram.program);
 
-        // Create list of all active GameObjects to act on during FixedUpdate
-        this.activeGameObjects = []
+        // Create list of all active GameObjects to act on during FixedUpdate and Render
+        this.activeGameObjects = {}
+        this.activeGameObjects["Player"] = []
+        this.activeGameObjects["Enemy"] = []
+        this.activeGameObjects["Asteroid"] = []
+        this.activeGameObjects["Crate"] = []
+        this.activeGameObjects["Laser"] = []
 
         // Create GameObjects
-        this.crates = [];
-        this.asteroids = [];
-        this.enemies = [];
-        this.lasers = [];
         this.createPlayer(rocketJson);
         this.createEnemies(0, rocketJson);
         this.createAsteroids(1000, asteroidJson);
@@ -128,6 +132,9 @@ class Game {
         var numFrames = 0;
         var theta = 0;
         var phi = 0;
+        const asteroids = this.activeGameObjects["Asteroid"]
+        const crates = this.activeGameObjects["Crate"]
+        const lasers = this.activeGameObjects["Laser"]
         function render () {
             clearGL(this.gl);
             var cameraInput = InputManager.readCameraInput();
@@ -137,32 +144,31 @@ class Game {
             this.camera.trackObject(this.player, theta, phi);
             this.textureProgram.updateCamera();
 
-            if (this.asteroids.length > 0) {
-                var renderDataList = this.asteroids[0].renderData;
+            if (asteroids.length > 0) {
+                var renderDataList = asteroids[0].renderData; // Render data for all asteroids is the same
                 var renderData = renderDataList[0];
-                this.textureProgram.batchDraw(this.asteroids, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
+                this.textureProgram.batchDraw(asteroids, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
             }
 
-            if (this.crates.length > 0) {
-                var renderDataList = this.crates[0].renderData;
+            if (crates.length  > 0) {
+                var renderDataList = crates[0].renderData; // Render data for all crates is the same
                 var renderData = renderDataList[0];
-                this.textureProgram.batchDraw(this.crates, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
+                this.textureProgram.batchDraw(crates, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
             }
 
-            if (this.enemies.length > 0) {
-                var renderDataList = this.enemies[0].renderData
+//            if (this.enemies.length > 0) {
+//                var renderDataList = this.enemies[0].renderData
+//                for (var j = 0; j < renderDataList.length; j++) {
+//                    var renderData = renderDataList[j]
+//                    this.textureProgram.batchDraw(this.enemies, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
+//                }
+//            }
+
+            if (lasers.length > 0) {
+                var renderDataList = lasers[0].renderData
                 for (var j = 0; j < renderDataList.length; j++) {
                     var renderData = renderDataList[j]
-                    this.textureProgram.batchDraw(this.enemies, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
-                }
-            }
-
-
-            if (this.lasers.length > 0) {
-                var renderDataList = this.lasers[0].renderData
-                for (var j = 0; j < renderDataList.length; j++) {
-                    var renderData = renderDataList[j]
-                    this.textureProgram.batchDraw(this.lasers, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
+                    this.textureProgram.batchDraw(lasers, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
                 }
             }
 
@@ -198,10 +204,12 @@ class Game {
         var deltaTime = 0
         var updateNum = 0
         this.wasPlayerOutOfBounds = false
+        var activeGameObjects = this.activeGameObjects
         while(true) {
             curTime = performance.now() / 1000;
             deltaTime = curTime - prevTime;
             prevTime = curTime;
+
             if (this.wasPlayerOutOfBounds && !this.isPlayerOutOfBounds()) {
                 this.updateHUD()
             }
@@ -212,54 +220,51 @@ class Game {
 
             this.wasPlayerOutOfBounds = this.isPlayerOutOfBounds()
 
-            this.activeGameObjects.forEach(function (gameObject) {
-                gameObject.fixedUpdate(.02)
-            })
-
-            // Handle laser firing
-            if (InputManager.isKeyPressed("F") && this.player.curCoolDown < 0) {
-                this.audioManager.playSound(SoundsEnum.LASER);
-                var laserSpawnPoint = this.player.transform.position.copy();
-                laserSpawnPoint.add(this.player.moveDir.scaled(5));
-                this.createLaser(this.laserJson, laserSpawnPoint, this.player.transform.rotation.copy(), this.player.moveDir.copy());
-                this.player.curCoolDown = this.player.laserCoolDown;
-            }
-
-            // Despawn any lasers
-            for (var i = 0; i < this.lasers.length; i++) {
-                var laser = this.lasers[i]
-                if (laser.despawnTime <= 0) {
-                    this.lasers.splice(i,1);
-                    //TODO: Remove from gameobject list
+            Object.keys(activeGameObjects).forEach(function(key,index) {
+                for (var i = 0; i < activeGameObjects[key].length; i++) {
+                    if (activeGameObjects[key][i].isDestroyed) {
+                        activeGameObjects[key].splice(i,1);
+                    }
+                    else {
+                        activeGameObjects[key][i].fixedUpdate(.02)
+                    }
                 }
-            }
+            });
 
-            // Check if player has collided with any crates
-            for (var i = 0; i < this.crates.length; i++) {
-                var crate = this.crates[i];
+            // Check if player has collided with any crates or asteroids
+            // TODO: Add proper collision detection that uses spatial hashing
+            for (var i = 0; i < activeGameObjects["Crate"].length; i++) {
+                var crate = activeGameObjects["Crate"][i];
                 if (crate.transform.position.distance(this.player.transform.position) < 3) {
-                    console.log("Crate!")
-                    this.numCratesCollected += 1;
-                    this.updateHUD();
-                    this.audioManager.playSound(SoundsEnum.PICKUP);
-                    this.crates.splice(i,1);
-                    //TODO: Remove from gameobject list
+                    crate.onCollisionEnter(this.player);
                 }
             }
-            for (var i = 0; i < this.asteroids.length; i++) {
-                var asteroid = this.asteroids[i]
+            for (var i = 0; i < activeGameObjects["Asteroid"].length; i++) {
+                var asteroid = activeGameObjects["Asteroid"][i]
                 if (asteroid.transform.position.distance(this.player.transform.position) < 1 && this.player.iFrames <= 0) {
-                    this.player.iFrames = 1
-                    this.audioManager.playSound(SoundsEnum.CRASH);
-                    this.numAsteroidsCollidedWith += 1;
-                    this.updateHUD();
-                    console.log("Hit by asteroid")
+                    asteroid.onCollisionEnter(this.player);
                 }
             }
 
             updateNum++;
-            await this.sleep(1000/60);
+            await this.sleep(1000/60); // update every 1/60th of a second
         }
+    }
+
+    hitByAsteroid() {
+        console.log("Hit by asteroid")
+        this.player.iFrames = 1
+        this.audioManager.playSound(SoundsEnum.CRASH);
+        this.numAsteroidsCollidedWith += 1;
+        this.updateHUD();
+    }
+
+    fireLaser() {
+        this.audioManager.playSound(SoundsEnum.LASER);
+        var laserSpawnPoint = this.player.transform.position.copy();
+        laserSpawnPoint.add(this.player.moveDir.scaled(5));
+        this.createLaser(this.laserJson, laserSpawnPoint, this.player.transform.rotation.copy(), this.player.moveDir.copy());
+        this.player.curCoolDown = this.player.laserCoolDown;
     }
 
     initializeAudio() {
@@ -292,7 +297,6 @@ class Game {
 
         for (var i = 0; i < numAsteroids; i++) {
             var asteroid = new Asteroid("asteroid" + i, Vector3.random(-this.fieldSize/2, this.fieldSize/2), renderData)
-            this.asteroids.push(asteroid);
             this.addGameObject(asteroid);
         }
     }
@@ -312,7 +316,6 @@ class Game {
         laser.transform.rotation = rotation
         laser.transform.scale.scale(.3)
         laser.transform.scale.y *= 3
-        this.lasers.push(laser)
         this.addGameObject(laser);
     }
 
@@ -343,8 +346,7 @@ class Game {
         for (var i = 0; i < numEnemies; i++) {
             var enemy = new Rocket("Enemy " + i, new Vector3(0,i,0), renderData, this.player)
             enemy.transform.scale.scale(.01);
-            this.enemies.push(enemy);
-            this.addGameObject(enemy);
+            this.addGameObject(enemy, enemy.tag);
         }
     }
 
@@ -353,12 +355,11 @@ class Game {
         for (var i = 0; i < numCrates; i++) {
             var deltaRotation = Vector3.random(0, 1); // Rotation speed for the crate
             var crate = new Crate("crate" + i, Vector3.random(-this.fieldSize/2, this.fieldSize/2), this.textureLoader.getTexture("crate"), deltaRotation);
-            this.crates.push(crate);
             this.addGameObject(crate);
         }
     }
 
     addGameObject(gameObject) {
-        this.activeGameObjects.push(gameObject);
+        this.activeGameObjects[gameObject.tag].push(gameObject);
     }
 }
