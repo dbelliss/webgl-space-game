@@ -7,6 +7,7 @@
 class Player extends MeshObject {
     constructor(_name, position, renderData) {
         super(_name, position, renderData);
+        this.tag = "Player"
         this.transform.rotation.x = 90
         this.moveDir = new Vector3(0,0,1)
         this.thrust = 1
@@ -65,5 +66,10 @@ class Player extends MeshObject {
             this.drag = 1000
         }
         super.fixedUpdate(deltaTime)
+
+        // Handle laser firing
+        if (InputManager.isKeyPressed("F") && this.curCoolDown < 0) {
+            Game.instance.fireLaser()
+        }
     }
 }

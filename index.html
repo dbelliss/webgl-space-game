@@ -39,7 +39,6 @@
     <script src="./lib/asteroid.js"></script>
     <script src="./lib/player.js"></script>
     <script src="./lib/renderData.js"></script>
-    <script src="./lib/renderer.js"></script>
     <script src="./lib/vector3.js"></script>
     <script src="./lib/transform.js"></script>
     <script src="./game.js"></script>
@@ -52,16 +51,47 @@
     <script src="./lib/rocket.js"></script>
     <script src="./lib/laser.js"></script>
 
-    <h1> Options </h1>
-    <div class="volumeSettings">
-      <div class="musicSettings">
-        <p> Music Volume </p>
-        <input type="range" min="0" max="100" value="100" class="slider" id="musicVolumeSlider">
+    <div id="gameInfo">
+      <div id="options">
+        <h1>
+          Options
+        </h1>
+        <div class="volumeSettings">
+          <div class="musicSettings">
+            <p> Music Volume </p>
+            <input type="range" min="0" max="100" value="100" class="slider" id="musicVolumeSlider">
+          </div>
+          <div class="sfxSettings">
+            <p> SFX Volume </p>
+            <input type="range" min="0" max="100" value="100" class="slider" id="sfxVolumeSlider">
+          </div>
+        </div>
       </div>
-      <div class="sfxSettings">
-        <p> SFX Volume </p>
-        <input type="range" min="0" max="100" value="100" class="slider" id="sfxVolumeSlider">
+      <div id="intro">
+        <h1>
+          Welcome to Crate Collectors Inc.!
+        </h1>
+        <p>
+          For your first day on the job as a collector, you travel to the asteroid sector to claim some loot.
+          <br>
+          Just don't hit any asteroids, or else you'll damage the cargo, and hopefully no raiders come by...
+          <br>
+          Remember, the more crates you collect, the more you get paid!
+        </p>
+      </div>
+      <div id="controls">
+        <h1>
+          Controls
+        </h1>
+        <p>
+          <ul>
+            <li>WASD to change your movement direction</li>
+            <li>Spacebar to move forward</li>
+            <li>F to fire your laser</li>
+          </ul>
+        </p>
       </div>
     </div>
+
   </body>
 </html>

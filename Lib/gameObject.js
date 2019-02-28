@@ -6,6 +6,7 @@
  */
 class GameObject {
     constructor(_name, position) {
+        this.tag = "GameObject"
         this.name = _name;
         this.transform = new Transform(position);
         this.mass = 1

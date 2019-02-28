@@ -6,6 +6,7 @@
 class Asteroid extends MeshObject{
     constructor(_name, position, renderData) {
         super(_name, position);
+        this.tag = "Asteroid"
         this.transform.position = position;
         this.renderData = renderData
 
@@ -27,6 +28,12 @@ class Asteroid extends MeshObject{
         this.transform.rotation.x = Math.random() * 360;
         this.transform.rotation.y = Math.random() * 360;
         this.transform.rotation.z = Math.random() * 360;
+    }
+
+    onCollisionEnter(other) {
+        if (other.tag == "Player") {
+            Game.instance.hitByAsteroid()
+        }
     }
 
     fixedUpdate(deltaTime) {
