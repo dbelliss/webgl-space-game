@@ -19,3 +19,10 @@
 ## 0.0.3
 * Player can shoot lasers
 * Enemy rockets can be created, but do not move
+
+## 0.0.4
+* Adding hud that displays:
+  * Number of boxes collected
+  * Number of asteroids collided with
+  * Score (crates * 50 - asteroids * 20)
+  * Fixing bug with music not played if the file was not loaded fast enough
