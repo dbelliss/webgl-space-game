@@ -26,3 +26,6 @@
   * Number of asteroids collided with
   * Score (crates * 50 - asteroids * 20)
   * Fixing bug with music not played if the file was not loaded fast enough
+
+## 0.0.5
+* Restructuring files

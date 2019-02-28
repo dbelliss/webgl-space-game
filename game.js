@@ -2,9 +2,9 @@
 
 function Initialize() {
 
-    loadJSONResource('./Assets/Asteroid.json', function (modelErr, asteroidObj) {
-        loadJSONResource('./Assets/rocket.json', function (modelErr, rocketObj) {
-            loadJSONResource('./Assets/laser.json', function (modelErr, laserObj) {
+    loadJSONResource('./Assets/Models/Asteroid.json', function (modelErr, asteroidObj) {
+        loadJSONResource('./Assets/Models/rocket.json', function (modelErr, rocketObj) {
+            loadJSONResource('./Assets/Models/laser.json', function (modelErr, laserObj) {
                 var game = new Game(asteroidObj, rocketObj, laserObj);
             });
         });
@@ -33,7 +33,7 @@ class Game {
     updateHUD() {
         console.log("Updating HUD");
         var crateImage = new Image();
-        crateImage.src = 'Assets/crate.png';
+        crateImage.src = 'Assets/Textures/crate.png';
         var context2dCtx = this.context2dCtx;
         context2dCtx.clearRect(0, 0,  this.canvas2d.width,  this.canvas2d.height);
         crateImage.onload = function() {
@@ -41,7 +41,7 @@ class Game {
         }
 
         var asteroidImage = new Image();
-        asteroidImage.src = 'Assets/rocky-texture.jpg';
+        asteroidImage.src = 'Assets/Textures/rocky-texture.jpg';
         asteroidImage.onload = function() {
             context2dCtx.drawImage(asteroidImage, 20, 75, 50, 50);
         }
