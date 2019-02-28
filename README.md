@@ -1,16 +1,16 @@
 # WebGL Space Game
 
-A repository for a simple game in WebGL
+A simple game in WebGL without using any frameworks to manage the graphics like three.js.
 
-## Tools
+## Tools/Libraries
 * http://glmatrix.net/
 * https://github.com/madrobby/keymaster
 * https://realfavicongenerator.net/
+* https://github.com/acgessler/assimp2json
 
 ## References:
 * http://learnwebgl.brown37.net/index.html
 * https://www.youtube.com/watch?v=kB0ZVUrI4Aw
-* https://github.com/acgessler/assimp2json
 
 ## Assets
 * https://opengameart.org/content/simple-toon-wooden-crate-texture
