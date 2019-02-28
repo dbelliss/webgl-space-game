@@ -20,9 +20,8 @@ class Game {
 
     loadHUD() {
 
-        var canvas2d = document.getElementById('hud');
-        var context = canvas2d.getContext('2d');
-        this.context2dCtx = context;
+        this.canvas2d = document.getElementById('hud');
+        this.context2dCtx = this.canvas2d.getContext('2d');;
 
 
         this.numCratesCollected = 0
@@ -36,6 +35,7 @@ class Game {
         var crateImage = new Image();
         crateImage.src = 'Assets/crate.png';
         var context2dCtx = this.context2dCtx;
+        context2dCtx.clearRect(0, 0,  this.canvas2d.width,  this.canvas2d.height);
         crateImage.onload = function() {
             context2dCtx.drawImage(crateImage, 20, 20, 50, 50);
         }
@@ -54,7 +54,13 @@ class Game {
         context2dCtx.fillText("x" + this.numAsteroidsCollidedWith, 80, 110);
 
         context2dCtx.textAlign = "right";
-        context2dCtx.fillText("Score: " + this.calculateScore(), 750, 55);
+        context2dCtx.fillText("Score: " + this.calculateScore(), 950, 55);
+
+        if (this.isPlayerOutOfBounds()) {
+            context2dCtx.fillStyle = "red";
+            context2dCtx.textAlign = "center";
+            context2dCtx.fillText("Warning: Leaving Collection Area", 500, 200);
+        }
     }
 
     calculateScore() {
@@ -181,15 +187,32 @@ class Game {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    isPlayerOutOfBounds() {
+        return this.player != undefined && (Math.abs(this.player.transform.position.x) > this.fieldSize / 1.5 ||
+                    Math.abs(this.player.transform.position.y) > this.fieldSize / 1.5 ||
+                    Math.abs(this.player.transform.position.z) > this.fieldSize / 1.5);
+    }
+
     async beginFixedUpdateLoop() {
         var prevTime = performance.now() / 1000; // Get seconds
         var curTime = performance.now() / 1000;
         var deltaTime = 0
         var updateNum = 0
+        this.wasPlayerOutOfBounds = false
         while(true) {
             curTime = performance.now() / 1000;
             deltaTime = curTime - prevTime;
             prevTime = curTime;
+            if (this.wasPlayerOutOfBounds && !this.isPlayerOutOfBounds()) {
+                this.updateHUD()
+            }
+
+            if (!this.wasPlayerOutOfBounds && this.isPlayerOutOfBounds()) {
+                this.updateHUD()
+            }
+
+            this.wasPlayerOutOfBounds = this.isPlayerOutOfBounds()
+
             this.activeGameObjects.forEach(function (gameObject) {
                 gameObject.fixedUpdate(.02)
             })
