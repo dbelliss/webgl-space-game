@@ -1,14 +1,20 @@
 "use strict";
 
 /**
- * Class for a cube GameObject
+ * Class for a Crate GameObject
  */
-class Cube extends GameObject{
-    constructor(_name, position, texture) {
+class Crate extends GameObject{
+    constructor(_name, position, texture, deltaRotation) {
         super(_name, position);
         var box = this.generateTexturedBox();
         this.renderData = [new RenderData(texture, box[0], box[2], box[1])]
         this.transform.position = position;
+        this.deltaRotation = deltaRotation; // How much to rotate crate by each update
+
+        // Give crate a random initial rotation
+        this.transform.rotation.x = Math.random() * 360;
+        this.transform.rotation.y = Math.random() * 360;
+        this.transform.rotation.z = Math.random() * 360;
     }
 
 
@@ -115,4 +121,11 @@ class Cube extends GameObject{
         return [boxVertices, textureVertices, boxIndices];
     }
 
+    fixedUpdate(deltaTime) {
+        // Rotate by the set amount
+        this.transform.rotation.x = (this.transform.rotation.x + this.deltaRotation.x) % 360;
+        this.transform.rotation.y = (this.transform.rotation.y + this.deltaRotation.y) % 360;
+        this.transform.rotation.z = (this.transform.rotation.z + this.deltaRotation.z) % 360;
+        super.fixedUpdate(deltaTime)
+    }
 }
