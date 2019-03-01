@@ -31,6 +31,7 @@ class TextureLoader {
         this.loadTexture("./Assets/Textures/rocketTexture2.png", "blueRocket");
         this.loadTexture("./Assets/Textures/rocky-texture.jpg", "rock");
         this.loadTexture("./Assets/Textures/laser.png", "laser");
+        this.loadTexture("./Assets/Textures/space.png", "space");
     }
 
     /**
@@ -83,7 +84,14 @@ class TextureLoader {
                 return (value & (value - 1)) == 0;
             }
 
-            if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+            if (textureName == "space") {
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.generateMipmap(gl.TEXTURE_2D);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+            }
+            else if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
                // Yes, it's a power of 2. Generate mips.
                gl.generateMipmap(gl.TEXTURE_2D);
             } else {

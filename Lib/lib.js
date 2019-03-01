@@ -32,3 +32,13 @@ var clearGL = function(gl) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.clearColor(0, 0, 0, 1);
 }
+
+function disableCulling(gl) {
+    gl.disable(gl.CULL_FACE);
+}
+
+function enableCulling(gl) {
+    gl.enable(gl.CULL_FACE);
+    gl.frontFace(gl.CCW);
+    gl.cullFace(gl.BACK);
+}

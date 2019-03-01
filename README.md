@@ -22,3 +22,4 @@ A simple game in WebGL without using any frameworks to manage the graphics like 
 * https://www.shutterstock.com/image-illustration/seamless-texture-surface-moon-269082104
 * https://freesound.org/people/bubaproducer/sounds/151022/
 * https://www.dafont.com/nasalization.font
+* https://designshack.net/articles/graphics/5-quick-and-easy-photoshop-textures-you-can-make-from-scratch/

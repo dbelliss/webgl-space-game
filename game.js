@@ -79,7 +79,7 @@ class Game {
     constructor(asteroidJson, rocketJson, laserJson) {
         Game.instance = this
         this.laserJson = laserJson;
-        this.fieldSize = 300
+        this.fieldSize = 500
         this.canvasHeight = 800;
         this.canvasWidth = 800;
         window.onkeydown = function(e) {
@@ -124,9 +124,11 @@ class Game {
         // Create GameObjects
         this.createPlayer(rocketJson);
         this.createEnemies(0, rocketJson);
-        this.createAsteroids(1000, asteroidJson);
+        this.createAsteroids(5000, asteroidJson);
         this.createCrates(1000);
         this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
+
+        this.skybox = new Skybox("Skybox", Vector3.random(0,0), this.textureLoader.getTexture("space"), new Vector3(0,0,0));
 
         // Render Loop
         var numFrames = 0;
@@ -181,6 +183,17 @@ class Game {
                 }
             }
 
+            if (this.skybox) {
+                disableCulling(this.gl);
+                var gameObject = this.skybox
+                var renderDataList = gameObject.renderData
+                for (var j = 0; j < renderDataList.length; j++) {
+                    var renderData = renderDataList[j]
+                    this.textureProgram.drawMesh(renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW, gameObject.transform)
+                }
+                enableCulling(this.gl);
+            }
+
             numFrames++;
             requestAnimationFrame(render.bind(this));
         };
@@ -210,6 +223,7 @@ class Game {
             deltaTime = curTime - prevTime;
             prevTime = curTime;
 
+            this.skybox.transform.position = this.player.transform.position
             if (this.wasPlayerOutOfBounds && !this.isPlayerOutOfBounds()) {
                 this.updateHUD()
             }

@@ -186,9 +186,18 @@ class TextureProgram extends Program {
 
         for (var i = 0; i < gameObjects.length; i++) {
             var gameObject = gameObjects[i]
-            this.setWorldMatrix(gameObject.transform);
-            gl.drawElements(gl.TRIANGLES, meshIndices.length, gl.UNSIGNED_SHORT, 0);
+            if (this.isVisible(gameObject)) {
+                this.setWorldMatrix(gameObject.transform);
+                gl.drawElements(gl.TRIANGLES, meshIndices.length, gl.UNSIGNED_SHORT, 0);
+            }
         }
+    }
 
+    isVisible(gameObject) {
+        var v1 = Game.instance.player.moveDir;
+        var v2 = gameObject.transform.position.difference(Camera.instance.position);
+        var dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+        var angle = Math.acos(dot/(v1.magnitude() * v2.magnitude()));
+        return angle < Math.PI/4
     }
 }

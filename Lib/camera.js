@@ -18,6 +18,8 @@ class Camera {
         this.c = new Vector3(0, 0, -1);
         this.xPeriod = 0
         this.yPeriod = 0
+        Camera.instance = this;
+        this.position = new Vector3(0,0,0)
     }
 
    /**
@@ -28,7 +30,7 @@ class Camera {
     trackObject(gameObject, dx, dy) {
         var v = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z)
         v.add(gameObject.moveDir.normalized().scaled(-1 * this.distance))
-
+        this.position = v
         glMatrix.mat4.lookAt(this.viewMatrix,
                              [v.x, v.y, v.z],
                              [gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z],
