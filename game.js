@@ -125,7 +125,7 @@ class Game {
         this.createPlayer(rocketJson);
         this.createEnemies(0, rocketJson);
         this.createAsteroids(5000, asteroidJson);
-        this.createCrates(1000);
+        this.createCrates(5000);
         this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
 
         this.skybox = new Skybox("Skybox", Vector3.random(0,0), this.textureLoader.getTexture("space"), new Vector3(0,0,0));
@@ -260,6 +260,7 @@ class Game {
                 var asteroid = activeGameObjects["Asteroid"][i]
                 if (this.player.iFrames <= 0) {
                     if (this.player.collider.isCollidingWith(asteroid.collider)) {
+                        Camera.instance.shake(.5);
                         asteroid.onCollisionEnter(this.player);
                     }
                 }
