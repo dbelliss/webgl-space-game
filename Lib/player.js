@@ -18,6 +18,7 @@ class Player extends MeshObject {
         this.iFrames = 0; // Invincibility frames
         this.laserCoolDown = 1
         this.curCoolDown = 0
+        this.collider = new BoxCollider(this.transform.position, 2, 2, 2)
 
     }
 

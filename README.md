@@ -11,6 +11,9 @@ A simple game in WebGL without using any frameworks to manage the graphics like 
 ## References:
 * http://learnwebgl.brown37.net/index.html
 * https://www.youtube.com/watch?v=kB0ZVUrI4Aw
+* https://gamedev.stackexchange.com/questions/60505/how-to-check-for-cube-collisions
+* https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
+* https://en.wikipedia.org/wiki/Octree
 
 ## Assets
 * https://opengameart.org/content/simple-toon-wooden-crate-texture
@@ -23,3 +26,4 @@ A simple game in WebGL without using any frameworks to manage the graphics like 
 * https://freesound.org/people/bubaproducer/sounds/151022/
 * https://www.dafont.com/nasalization.font
 * https://designshack.net/articles/graphics/5-quick-and-easy-photoshop-textures-you-can-make-from-scratch/
+* https://www.gamedev.net/forums/topic/300428-sphere-box-collision/

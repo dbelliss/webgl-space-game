@@ -21,13 +21,16 @@ class Asteroid extends MeshObject{
             this.deltaRotation = new Vector3(0, 0, 1)
         }
 
-        this.transform.scale = new Vector3(.04, .05, .04)
-        this.transform.scale.scale(1 + Math.floor(Math.random() * 8))
+        this.transform.scale = new Vector3(.05, .05, .04)
+        var scaleFactor = 1 + Math.floor(Math.random() * 8)
+        this.transform.scale.scale(scaleFactor)
 
         // Set random initial rotation
         this.transform.rotation.x = Math.random() * 360;
         this.transform.rotation.y = Math.random() * 360;
         this.transform.rotation.z = Math.random() * 360;
+
+        this.collider = new SphereCollider(this.transform.position, scaleFactor, scaleFactor, scaleFactor)
     }
 
     onCollisionEnter(other) {

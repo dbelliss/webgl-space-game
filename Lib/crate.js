@@ -16,6 +16,8 @@ class Crate extends GameObject{
         this.transform.rotation.x = Math.random() * 360;
         this.transform.rotation.y = Math.random() * 360;
         this.transform.rotation.z = Math.random() * 360;
+        var collision_modifier = 1; // Make it easier to players to collet crates
+        this.collider = new BoxCollider(this.transform.position, this.transform.scale.x + collision_modifier, this.transform.scale.y + collision_modifier, this.transform.scale.z + collision_modifier)
     }
 
     onCollisionEnter(other) {

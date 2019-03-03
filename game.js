@@ -247,21 +247,33 @@ class Game {
 
             // Check if player has collided with any crates or asteroids
             // TODO: Add proper collision detection that uses spatial hashing
+            var spatialHash = this.generateSpatialHash()
+
+
             for (var i = 0; i < activeGameObjects["Crate"].length; i++) {
                 var crate = activeGameObjects["Crate"][i];
-                if (crate.transform.position.distance(this.player.transform.position) < 3) {
+                if (this.player.collider.isCollidingWith(crate.collider)) {
                     crate.onCollisionEnter(this.player);
                 }
             }
             for (var i = 0; i < activeGameObjects["Asteroid"].length; i++) {
                 var asteroid = activeGameObjects["Asteroid"][i]
-                if (asteroid.transform.position.distance(this.player.transform.position) < 1 && this.player.iFrames <= 0) {
-                    asteroid.onCollisionEnter(this.player);
+                if (this.player.iFrames <= 0) {
+                    if (this.player.collider.isCollidingWith(asteroid.collider)) {
+                        asteroid.onCollisionEnter(this.player);
+                    }
                 }
             }
 
             updateNum++;
             await this.sleep(1000/60); // update every 1/60th of a second
+        }
+    }
+
+    generateSpatialHash() {
+        var cellSize = 5
+        for (var i = 0; i < this.activeGameObjects.length; i++) {
+
         }
     }
 
