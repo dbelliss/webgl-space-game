@@ -13,11 +13,21 @@ class Crate extends GameObject{
         this.deltaRotation = deltaRotation; // How much to rotate crate by each update
 
         // Give crate a random initial rotation
-        this.transform.rotation.x = Math.random() * 360;
-        this.transform.rotation.y = Math.random() * 360;
-        this.transform.rotation.z = Math.random() * 360;
+        var initialRotation = new Vector3(0, 0, 0)
+        initialRotation.x = Math.random() * 360;
+        initialRotation.y = Math.random() * 360;
+        initialRotation.z = Math.random() * 360;
+
+        var newRotationQuaternion = new Float32Array(4);
+        glMatrix.quat.fromEuler(newRotationQuaternion, initialRotation.x, initialRotation.y, initialRotation.z);
+        glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, newRotationQuaternion)
+
         var collision_modifier = 1; // Make it easier to players to collet crates
         this.collider = new BoxCollider(this.transform.position, this.transform.scale.x + collision_modifier, this.transform.scale.y + collision_modifier, this.transform.scale.z + collision_modifier)
+
+
+        this.deltaRotationQuat = new Float32Array(4);
+        glMatrix.quat.fromEuler(this.deltaRotationQuat, deltaRotation.x, deltaRotation.y, deltaRotation.z);
     }
 
     onCollisionEnter(other) {
@@ -134,9 +144,8 @@ class Crate extends GameObject{
 
     fixedUpdate(deltaTime) {
         // Rotate by the set amount
-        this.transform.rotation.x = (this.transform.rotation.x + this.deltaRotation.x) % 360;
-        this.transform.rotation.y = (this.transform.rotation.y + this.deltaRotation.y) % 360;
-        this.transform.rotation.z = (this.transform.rotation.z + this.deltaRotation.z) % 360;
+        glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, this.deltaRotationQuat)
+
         super.fixedUpdate(deltaTime)
     }
 }

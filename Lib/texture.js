@@ -1,4 +1,3 @@
-
 class Texture {
     constructor(textureName, texture) {
         this.textureName = textureName;

@@ -8,7 +8,7 @@ class Transform {
     constructor(position) {
         this.position = position
         this.scale = new Vector3(1, 1, 1);
-        this.rotation = new Vector3(0, 0, 0);
+        this.rotation = glMatrix.quat.fromValues(0, 0, 0, 1);
         this.children = [];
         this.parentTransform = undefined;
     }

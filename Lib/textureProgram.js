@@ -92,7 +92,8 @@ class TextureProgram extends Program {
         this.scale[0] = transform.scale.x
         this.scale[1] = transform.scale.y
         this.scale[2] = transform.scale.z
-        glMatrix.quat.fromEuler(this.quat, transform.rotation.x, transform.rotation.y, transform.rotation.z)
+
+        this.quat = transform.rotation
 
         glMatrix.mat4.fromRotationTranslationScaleOrigin(this.worldMatrix, this.quat, this.position, this.scale, this.origin)
         gl.uniformMatrix4fv(this.matWorldUniformLocation, gl.FALSE, this.worldMatrix);
@@ -195,6 +196,7 @@ class TextureProgram extends Program {
 
     isVisible(gameObject) {
         var v1 = Game.instance.player.moveDir;
+        return true;
         var v2 = gameObject.transform.position.difference(Camera.instance.position);
         var dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
         var angle = Math.acos(dot/(v1.magnitude() * v2.magnitude()));
