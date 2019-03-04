@@ -33,9 +33,10 @@ class Camera {
     * @param {gameObject} GameObject to stay relative to
     */
     trackObject(gameObject, dx, dy) {
+
+        // Get camera position by maintaining the same relative distance from the player
         var v = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z)
-        v.add(new Vector3(0,0,-20))
-//        v.add(gameObject.moveDir.normalized().scaled(-1 * this.distance))
+        v.add(gameObject.moveDir.normalized().scaled(-1 * this.distance))
         this.position = v
         if (this.isShaking) {
             var curTime = performance.now() / 1000
@@ -48,10 +49,17 @@ class Camera {
                 this.isShaking = false
             }
         }
+
+        // Default up vector
+        var up = new Float32Array(3)
+        up[2] = -1
+        // Rotate up vector by player quaternion
+        glMatrix.vec3.transformQuat(up, up, gameObject.transform.rotation)
+
         glMatrix.mat4.lookAt(this.viewMatrix,
                              [v.x, v.y, v.z],
                              [gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z],
-                             [0, 1, 0]);
+                             up);
     }
 
     shake(length) {
