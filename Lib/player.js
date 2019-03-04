@@ -9,7 +9,11 @@ class Player extends MeshObject {
         super(_name, position, renderData);
         this.tag = "Player"
 
-        glMatrix.quat.fromEuler(this.transform.rotation, 90, 0, 0)
+        glMatrix.quat.fromEuler(this.transform.rotation, 0, 0, 0)
+        this.originalRotation = new Float32Array(4);
+        glMatrix.quat.copy(this.originalRotation, this.transform.rotation)
+        this.deltaX = 0;
+        this.deltaZ = 0;
         this.moveDir = new Vector3(0,1,0)
         this.thrust = 1
         this.turnPower = -1.2
@@ -31,12 +35,20 @@ class Player extends MeshObject {
         this.iFrames -= deltaTime
         this.curCoolDown -= deltaTime
 
-
         var input = InputManager.readInput().scaled(this.turnPower)
-        var deltaRotation = new Float32Array(4)
-        glMatrix.quat.fromEuler(deltaRotation, input.x, input.y, 0);
+        this.deltaX += input.x
+        this.deltaZ += input.y
 
-        glMatrix.quat.mul(this.transform.rotation, deltaRotation, this.transform.rotation)
+
+        var deltaZRotation = new Float32Array(4)
+        glMatrix.quat.fromEuler(deltaZRotation, 0, 0, this.deltaZ);
+        glMatrix.quat.mul(this.transform.rotation, deltaZRotation, this.originalRotation)
+
+        var deltaXRotation = new Float32Array(4)
+        glMatrix.quat.fromEuler(deltaXRotation, this.deltaX, 0, 0);
+        glMatrix.quat.mul(this.transform.rotation,  deltaXRotation, this.transform.rotation)
+
+
 
         var newMoveDir = new Float32Array(3);
         newMoveDir[1] = 1

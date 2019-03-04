@@ -11,10 +11,10 @@ class InputManager {
         }
 
         if(key.isPressed("A")) {
-            transformVector.y += -1
+            transformVector.y += 1
         }
         else if (key.isPressed("D")) {
-            transformVector.y += 1
+            transformVector.y += -1
         }
 
         if(key.isPressed("Q")) {
