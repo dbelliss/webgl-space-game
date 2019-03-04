@@ -123,9 +123,9 @@ class Game {
 
         // Create GameObjects
         this.createPlayer(rocketJson);
-        this.createEnemies(0, rocketJson);
-        this.createAsteroids(5000, asteroidJson);
-        this.createCrates(5000);
+//        this.createEnemies(0, rocketJson);
+//        this.createAsteroids(5000, asteroidJson);
+        this.createCrates(1000);
         this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
 
         this.skybox = new Skybox("Skybox", Vector3.random(0,0), this.textureLoader.getTexture("space"), new Vector3(0,0,0));

@@ -34,7 +34,8 @@ class Camera {
     */
     trackObject(gameObject, dx, dy) {
         var v = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z)
-        v.add(gameObject.moveDir.normalized().scaled(-1 * this.distance))
+        v.add(new Vector3(0,0,-20))
+//        v.add(gameObject.moveDir.normalized().scaled(-1 * this.distance))
         this.position = v
         if (this.isShaking) {
             var curTime = performance.now() / 1000

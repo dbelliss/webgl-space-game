@@ -4,18 +4,26 @@ class InputManager {
     static readInput() {
         var transformVector = new Vector3(0,0,0)
         if(key.isPressed("W")) {
-            transformVector.y += 1
+            transformVector.x += 1
         }
         if (key.isPressed("S")) {
-            transformVector.y += -1
+            transformVector.x += -1
         }
 
         if(key.isPressed("A")) {
-            transformVector.x += -1
+            transformVector.y += -1
         }
         else if (key.isPressed("D")) {
-            transformVector.x += 1
+            transformVector.y += 1
         }
+
+        if(key.isPressed("Q")) {
+            transformVector.z += -1
+        }
+        else if (key.isPressed("E")) {
+            transformVector.z += 1
+        }
+
         return transformVector
     }
 
