@@ -124,7 +124,7 @@ class Game {
         // Create GameObjects
         this.createPlayer(rocketJson);
 //        this.createEnemies(0, rocketJson);
-//        this.createAsteroids(5000, asteroidJson);
+        this.createAsteroids(1000, asteroidJson);
         this.createCrates(1000);
         this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
 
@@ -139,12 +139,13 @@ class Game {
         const lasers = this.activeGameObjects["Laser"]
         function render () {
             clearGL(this.gl);
-            var cameraInput = InputManager.readCameraInput();
 
-            theta = cameraInput.x;
-            phi = cameraInput.y;
             this.camera.trackObject(this.player, theta, phi);
-            this.textureProgram.updateCamera();
+
+            //
+            // Draw all game objects
+            //
+            this.textureProgram.updateViewMatrix();
 
             if (asteroids.length > 0) {
                 var renderDataList = asteroids[0].renderData; // Render data for all asteroids is the same
@@ -289,8 +290,9 @@ class Game {
     fireLaser() {
         this.audioManager.playSound(SoundsEnum.LASER);
         var laserSpawnPoint = this.player.transform.position.copy();
-        laserSpawnPoint.add(this.player.moveDir.scaled(5));
-        this.createLaser(this.laserJson, laserSpawnPoint, this.player.transform.rotation.copy(), this.player.moveDir.copy());
+        laserSpawnPoint.add(this.player.moveDir.scaled(5)); // Shift laser to the tip of the ship
+        var laserRotation = new Float32Array(4)
+        this.createLaser(this.laserJson, laserSpawnPoint, glMatrix.quat.copy(laserRotation, this.player.transform.rotation), this.player.moveDir.copy());
         this.player.curCoolDown = this.player.laserCoolDown;
     }
 
@@ -338,11 +340,7 @@ class Game {
             var textureVertices = laserJson.meshes[i].texturecoords[0]
             renderData.push(new RenderData(texture, vertices, indices, textureVertices))
         }
-        var laser = new Laser("Laser", position, renderData, moveDir);
-
-        laser.transform.rotation = rotation
-        laser.transform.scale.scale(.3)
-        laser.transform.scale.y *= 3
+        var laser = new Laser("Laser", position, renderData, rotation, moveDir);
         this.addGameObject(laser);
     }
 

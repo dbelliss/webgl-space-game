@@ -4,30 +4,25 @@
  * Class for a Crate GameObject
  */
 class Crate extends GameObject{
-    constructor(_name, position, texture, deltaRotation) {
+    constructor(_name, position, texture) {
         super(_name, position);
         this.tag = "Crate"
         var box = this.generateTexturedBox();
         this.renderData = [new RenderData(texture, box[0], box[2], box[1])]
         this.transform.position = position;
-        this.deltaRotation = deltaRotation; // How much to rotate crate by each update
 
         // Give crate a random initial rotation
-        var initialRotation = new Vector3(0, 0, 0)
-        initialRotation.x = Math.random() * 360;
-        initialRotation.y = Math.random() * 360;
-        initialRotation.z = Math.random() * 360;
+        var initialRotation = new Vector3(Math.random() * 360, Math.random() * 360, Math.random() * 360)
+        glMatrix.quat.fromEuler(this.transform.rotation, initialRotation.x, initialRotation.y, initialRotation.z);
 
-        var newRotationQuaternion = new Float32Array(4);
-        glMatrix.quat.fromEuler(newRotationQuaternion, initialRotation.x, initialRotation.y, initialRotation.z);
-        glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, newRotationQuaternion)
-
-        var collision_modifier = 1; // Make it easier to players to collet crates
-        this.collider = new BoxCollider(this.transform.position, this.transform.scale.x + collision_modifier, this.transform.scale.y + collision_modifier, this.transform.scale.z + collision_modifier)
-
-
+        // Set up delta rotation for every fixed update
+        var deltaRotation = Vector3.random(-1,1); // How much to rotate crate by each update
         this.deltaRotationQuat = new Float32Array(4);
         glMatrix.quat.fromEuler(this.deltaRotationQuat, deltaRotation.x, deltaRotation.y, deltaRotation.z);
+
+        // Set up box collider
+        var collision_modifier = 1; // Make it easier to players to collect crates
+        this.collider = new BoxCollider(this.transform.position, this.transform.scale.x + collision_modifier, this.transform.scale.y + collision_modifier, this.transform.scale.z + collision_modifier)
     }
 
     onCollisionEnter(other) {
@@ -37,7 +32,6 @@ class Crate extends GameObject{
             Game.instance.crateCollected()
         }
     }
-
 
     generateTexturedBox() {
         var boxVertices =
@@ -145,7 +139,6 @@ class Crate extends GameObject{
     fixedUpdate(deltaTime) {
         // Rotate by the set amount
         glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, this.deltaRotationQuat)
-
         super.fixedUpdate(deltaTime)
     }
 }

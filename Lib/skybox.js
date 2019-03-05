@@ -7,7 +7,6 @@ class Skybox extends Crate {
         for (var i = 0; i < skyboxRenderData.length; i++) {
             skyboxRenderData[i] *= 5
         }
-        this.transform.rotation = new Vector3(0,0,0)
         this.player = Game.instance.player
         this.transform.position = this.player.transform.position
     }

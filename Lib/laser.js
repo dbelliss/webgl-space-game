@@ -2,7 +2,7 @@
  * Class for a laser GameObject
  */
 class Laser extends MeshObject{
-    constructor(_name, position, renderData, direction) {
+    constructor(_name, position, renderData, rotation, direction) {
         super(_name, position);
         this.tag = "Laser";
         this.transform.position = position;
@@ -12,6 +12,10 @@ class Laser extends MeshObject{
         this.drag = 0
         this.moveDir = direction.scaled(this.speed)
         this.despawnTime = 5
+
+        this.transform.rotation = rotation
+        this.transform.scale.scale(.3)
+        this.transform.scale.y *= 3
     }
 
     fixedUpdate(deltaTime) {

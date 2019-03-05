@@ -15,6 +15,7 @@ class Player extends MeshObject {
         this.deltaX = 0;
         this.deltaZ = 0;
         this.moveDir = new Vector3(0,1,0)
+        this.originalMoveDir = new Float32Array([0,1,0])
         this.thrust = 1
         this.turnPower = -1.2
         this.theta = 0
@@ -53,51 +54,37 @@ class Player extends MeshObject {
         var worldZ = new Float32Array(4)
         glMatrix.quat.fromEuler(worldX,0,0, 90)
 
-        // Rotate X degrees around the world Z axis to adjust yaw(World Z Axis goes down from the initial camera position)
+        // Rotate around the local Z axis to adjust yaw
         var deltaZRotation = new Float32Array(4)
         glMatrix.quat.fromEuler(deltaZRotation, 0, 0, this.deltaZ);
         glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, deltaZRotation)
 
-        // Rotate X degrees around the local X axis to adjust pitch (World X axis goes left from the initial camera position)
-        // Get the local X axis, by rotationg the world X axis by the current rotation
-//
-//        var worldXAxis = new Float32Array(4)
-//        glMatrix.quat.fromEuler(worldXAxis, 90, 0, 0)
-//
-//        var localXAxis = new Float32Array(4)
-//        glMatrix.quat.mul(localXAxis, this.transform.rotation, worldXAxis)
-//
-//
+        // Rotate around the local X axis to adjust pitch
         var deltaXRotation = new Float32Array(4)
         glMatrix.quat.fromEuler(deltaXRotation, this.deltaX, 0, 0);
         glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, deltaXRotation)
 
-//        var newLocalXAxis = new Float32Array(4)
-//        glMatrix.quat.mul(newLocalXAxis, this.localXAxis, this.
-//        glMatrix.quat.mul(deltaXRotation, deltaXRotation, this.transform.rotation)
-//
-//        glMatrix.quat.mul(this.transform.rotation,  this.transform.rotation, deltaXRotation)
-
+        // Get the current move direction by rotating the original moveDir by the current player rotation
         var newMoveDir = new Float32Array(3);
-        newMoveDir[1] = 1
-
-        glMatrix.vec3.transformQuat(newMoveDir, newMoveDir, this.transform.rotation)
-
+        glMatrix.vec3.transformQuat(newMoveDir, this.originalMoveDir, this.transform.rotation)
         this.moveDir.x = newMoveDir[0]
         this.moveDir.y = newMoveDir[1]
         this.moveDir.z = newMoveDir[2]
 
+        // Normalize velocity, and scale by expected speed
         var magnitude = this.velocity.magnitude()
         this.velocity = this.moveDir.scaled(magnitude)
 
+        // Don't apply drag if the player is pressing the gas pedal
         var shouldMove = InputManager.isKeyPressed("space");
         if (shouldMove) {
             this.drag = 0
             this.addForce(this.moveDir.scaled(this.thrust));
         }
         else {
-            this.drag = 1000
+            this.drag = .2
         }
+
         super.fixedUpdate(deltaTime)
 
         // Handle laser firing
