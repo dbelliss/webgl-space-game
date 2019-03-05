@@ -25,6 +25,8 @@ class Camera {
         this.shakeFrequency = .01;
         this.lastShakeTime = 0;
         this.offset = new Vector3(0,0,0);
+        this.defaultUp = glMatrix.vec3.fromValues(0, 0, -1)
+        this.up = new Float32Array(3)
     }
 
    /**
@@ -32,36 +34,42 @@ class Camera {
     *
     * @param {gameObject} GameObject to stay relative to
     */
-    trackObject(gameObject, dx, dy) {
-
+    trackObject(gameObject) {
         // Get camera position by maintaining the same relative distance from the player
         var v = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z)
         v.add(gameObject.moveDir.normalized().scaled(-1 * this.distance))
         this.position = v
+
+        // Apply screen shake if necessary
         if (this.isShaking) {
             var curTime = performance.now() / 1000
+
+            // Move camera position by a random offset every shakeFrequency seconds
             if (curTime - this.lastShakeTime > this.shakeFrequency) {
                 this.offset = Vector3.random(-.25, .25)
                 this.lastShakeTime = curTime
             }
             this.position.add(this.offset);
+
             if (curTime > this.shakeEndTime) {
                 this.isShaking = false
             }
         }
 
-        // Default up vector
-        var up = new Float32Array(3)
-        up[2] = -1
-        // Rotate up vector by player quaternion
-        glMatrix.vec3.transformQuat(up, up, gameObject.transform.rotation)
+        // Rotate the default up vector by the player rotation to get the current up vector
+        glMatrix.vec3.transformQuat(this.up, this.defaultUp, gameObject.transform.rotation)
 
         glMatrix.mat4.lookAt(this.viewMatrix,
                              [v.x, v.y, v.z],
                              [gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.position.z],
-                             up);
+                             this.up);
     }
 
+   /**
+    * Tell the camera to screen shake for length seconds
+    *
+    * @param {length} float of how many seconds to shake
+    */
     shake(length) {
         this.isShaking = true;
         this.shakeEndTime = performance.now() / 1000 + length

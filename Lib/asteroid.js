@@ -10,26 +10,26 @@ class Asteroid extends MeshObject{
         this.transform.position = position;
         this.renderData = renderData
 
-        var rotationType = Math.random()
-        if (rotationType < .3) {
-            this.deltaRotation = new Vector3(1, 0, 0)
-        }
-        else if (rotationType < .6) {
-            this.deltaRotation = new Vector3(0, 1, 0)
-        }
-        else{
-            this.deltaRotation = new Vector3(0, 0, 1)
-        }
+        // Set random initial rotation
+        var initialRotation = new Vector3(Math.random() * 360, Math.random() * 360, Math.random() * 360)
+        var newRotationQuaternion = new Float32Array(4);
+        glMatrix.quat.fromEuler(newRotationQuaternion, initialRotation.x, initialRotation.y, initialRotation.z);
+        glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, newRotationQuaternion)
 
+        // Generate a random rotation to rotate asteroid every fixed update
+        const rotationSpeed = .5
+        var rotationType = Math.random()
+        var deltaRotation = Vector3.random(-1,1)
+        deltaRotation.scale(rotationSpeed)
+        this.deltaRotationQuat = new Float32Array(4);
+        glMatrix.quat.fromEuler(this.deltaRotationQuat, deltaRotation.x, deltaRotation.y, deltaRotation.z);
+
+        // Set size of asteroid
         this.transform.scale = new Vector3(.05, .05, .04)
         var scaleFactor = 1 + Math.floor(Math.random() * 8)
         this.transform.scale.scale(scaleFactor)
 
-        // Set random initial rotation
-        this.transform.rotation.x = Math.random() * 360;
-        this.transform.rotation.y = Math.random() * 360;
-        this.transform.rotation.z = Math.random() * 360;
-
+        // Add sphere collider
         this.collider = new SphereCollider(this.transform.position, scaleFactor, scaleFactor, scaleFactor)
     }
 
@@ -41,9 +41,7 @@ class Asteroid extends MeshObject{
 
     fixedUpdate(deltaTime) {
         // Rotate by the set amount
-        this.transform.rotation.x = (this.transform.rotation.x + this.deltaRotation.x) % 360;
-        this.transform.rotation.y = (this.transform.rotation.y + this.deltaRotation.y) % 360;
-        this.transform.rotation.z = (this.transform.rotation.z + this.deltaRotation.z) % 360;
+        glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, this.deltaRotationQuat)
         super.fixedUpdate(deltaTime)
     }
 }

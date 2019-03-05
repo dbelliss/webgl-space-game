@@ -47,7 +47,7 @@ class TextureProgram extends Program {
 
         glMatrix.mat4.identity(this.worldMatrix);
         glMatrix.mat4.lookAt(this.viewMatrix, [0, -20, 10], [0, 0, 0], [0, 1, 0]);
-        glMatrix.mat4.perspective(this.projMatrix, glMatrix.glMatrix.toRadian(45), aspectRatio, 0.1, 5000.0);
+        glMatrix.mat4.perspective(this.projMatrix, glMatrix.glMatrix.toRadian(45), aspectRatio, 1, Game.instance.fieldSize);
         gl.uniformMatrix4fv(this.matWorldUniformLocation, gl.FALSE, this.worldMatrix);
         gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, this.viewMatrix);
         gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, this.projMatrix);
@@ -77,7 +77,7 @@ class TextureProgram extends Program {
     /**
      * Update the view matrix to reflect changes to the camera
      */
-    updateCamera() {
+    updateViewMatrix() {
         var matViewUniformLocation = this.gl.getUniformLocation(this.program, 'mView');
         this.gl.uniformMatrix4fv(matViewUniformLocation, this.gl.FALSE, this.viewMatrix);
     }
@@ -196,7 +196,6 @@ class TextureProgram extends Program {
 
     isVisible(gameObject) {
         var v1 = Game.instance.player.moveDir;
-        return true;
         var v2 = gameObject.transform.position.difference(Camera.instance.position);
         var dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
         var angle = Math.acos(dot/(v1.magnitude() * v2.magnitude()));

@@ -31,7 +31,7 @@ class TextureLoader {
         this.loadTexture("./Assets/Textures/rocketTexture2.png", "blueRocket");
         this.loadTexture("./Assets/Textures/rocky-texture.jpg", "rock");
         this.loadTexture("./Assets/Textures/laser.png", "laser");
-        this.loadTexture("./Assets/Textures/space.png", "space");
+        this.loadTexture("./Assets/Textures/simpleSky.png", "space");
     }
 
     /**
