@@ -125,7 +125,7 @@ class Game {
         this.createPlayer(rocketJson);
 //        this.createEnemies(0, rocketJson);
         this.createAsteroids(1000, asteroidJson);
-        this.createCrates(1000);
+        this.createCrates(5000);
         this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
 
         this.skybox = new Skybox("Skybox", Vector3.random(0,0), this.textureLoader.getTexture("space"), new Vector3(0,0,0));
@@ -199,6 +199,7 @@ class Game {
             requestAnimationFrame(render.bind(this));
         };
         requestAnimationFrame(render.bind(this));
+        this.spatialHash = this.generateSpatialHash()
         this.beginFixedUpdateLoop();
     }
 
@@ -238,6 +239,7 @@ class Game {
             Object.keys(activeGameObjects).forEach(function(key,index) {
                 for (var i = 0; i < activeGameObjects[key].length; i++) {
                     if (activeGameObjects[key][i].isDestroyed) {
+                        activeGameObjects[key][i].destroy()
                         activeGameObjects[key].splice(i,1);
                     }
                     else {
@@ -246,41 +248,28 @@ class Game {
                 }
             });
 
-            // Check if player has collided with any crates or asteroids
-            // TODO: Add proper collision detection that uses spatial hashing
-            var spatialHash = this.generateSpatialHash()
-
-
-            for (var i = 0; i < activeGameObjects["Crate"].length; i++) {
-                var crate = activeGameObjects["Crate"][i];
-                if (this.player.collider.isCollidingWith(crate.collider)) {
-                    crate.onCollisionEnter(this.player);
-                }
-                for (var j = 0; j < this.activeGameObjects["Laser"].length; j++) {
-                    var laser = this.activeGameObjects["Laser"][j];
-                    if (laser.collider.isCollidingWith(crate.collider)) {
-                        crate.onCollisionEnter(laser);
-                        laser.onCollisionEnter(crate);
-                    }
-                }
-            }
-            for (var i = 0; i < activeGameObjects["Asteroid"].length; i++) {
-                var asteroid = activeGameObjects["Asteroid"][i]
-                if (this.player.iFrames <= 0) {
-                    if (this.player.collider.isCollidingWith(asteroid.collider)) {
-                        Camera.instance.shake(.5);
-                        asteroid.onCollisionEnter(this.player);
-                        this.player.onCollisionEnter(asteroid)
-                    }
-                }
-                for (var j = 0; j < this.activeGameObjects["Laser"].length; j++) {
-                    var laser = this.activeGameObjects["Laser"][j];
-                    if (laser.collider.isCollidingWith(asteroid.collider)) {
-                        asteroid.onCollisionEnter(laser);
-                        laser.onCollisionEnter(asteroid);
-                    }
-                }
-            }
+            // Check for collisions
+            var spatialHash = this.spatialHash
+            Object.keys(spatialHash).forEach(function(key,index) {
+                var xHash = spatialHash[key]
+                Object.keys(xHash).forEach(function(key,index) {
+                    var yHash = xHash[key]
+                    Object.keys(yHash).forEach(function(key,index) {
+                        var zHash = yHash[key]
+                        var gameObjects = zHash
+                        for (var i = 0; i < gameObjects.length; i++) {
+                            for (var j = i + 1; j < gameObjects.length; j++) {
+                                var gameObject1 = gameObjects[i]
+                                var gameObject2 = gameObjects[j]
+                                if (gameObject1.collider.isCollidingWith(gameObject2.collider)) {
+                                    gameObject1.onCollisionEnter(gameObject2);
+                                    gameObject2.onCollisionEnter(gameObject1);
+                                }
+                            }
+                        }
+                    })
+                })
+            })
 
             updateNum++;
             await this.sleep(1000/60); // update every 1/60th of a second
@@ -288,11 +277,82 @@ class Game {
     }
 
     generateSpatialHash() {
-        var cellSize = 5
-        for (var i = 0; i < this.activeGameObjects.length; i++) {
+        this.cellSize = 20
+        var cellSize = this.cellSize
+        var activeGameObjects = this.activeGameObjects
+        var hash = {}
+        var addToSpatialHash = this.addToSpatialHash
+        Object.keys(activeGameObjects).forEach(function(key,index) {
+                for (var gameObjectNum = 0; gameObjectNum < activeGameObjects[key].length; gameObjectNum++) {
+                    var gameObject = activeGameObjects[key][gameObjectNum]
+                    addToSpatialHash(hash, gameObject, cellSize)
+                }
+        });
+        return hash;
+    }
 
+    getSpatialHashBucket(hash, gameObject) {
+
+    }
+
+    addToSpatialHash(hash, gameObject, cellSize) {
+        var collider = gameObject.collider
+        var isBox = collider.isBox;
+        var isSphere = collider.isSphere;
+
+        if (isBox) {
+            var center = collider.center
+
+            // Add one because every object could be on the boundary between 2 bounding cubes
+            var xBlocks = Math.ceil(collider.xSize * 2 / cellSize)
+            var yBlocks = Math.ceil(collider.ySize * 2 / cellSize)
+            var zBlocks = Math.ceil(collider.zSize * 2 / cellSize)
+
+            var startXBlock = Math.floor((collider.center.x - collider.xSize)/cellSize)
+            var startYBlock = Math.floor((collider.center.y - collider.ySize)/cellSize)
+            var startZBlock = Math.floor((collider.center.x - collider.zSize)/cellSize)
+
+            var endXBlock = Math.ceil(startXBlock + xBlocks)
+            var endYBlock = Math.ceil(startYBlock + yBlocks)
+            var endZBlock = Math.ceil(startZBlock + zBlocks)
+        }
+        else {
+            var center = collider.center
+
+            // Add one because every object could be on the boundary between 2 bounding cubes
+            var xBlocks = Math.ceil(collider.radius * 2 / cellSize)
+            var yBlocks = Math.ceil(collider.radius * 2 / cellSize)
+            var zBlocks = Math.ceil(collider.radius * 2 / cellSize)
+
+            var startXBlock = Math.floor((collider.center.x - collider.radius)/cellSize)
+            var startYBlock = Math.floor((collider.center.y - collider.radius)/cellSize)
+            var startZBlock = Math.floor((collider.center.x - collider.radius)/cellSize)
+
+            var endXBlock = Math.ceil(startXBlock + xBlocks)
+            var endYBlock = Math.ceil(startYBlock + yBlocks)
+            var endZBlock = Math.ceil(startZBlock + zBlocks)
+        }
+        // Add gameobject to all cells that might touch
+        for (var i = 0; i < xBlocks; i++) {
+            for (var j = 0; j < yBlocks; j++) {
+                for (var k = 0; k < zBlocks; k++) {
+                    if (hash[startXBlock + i] == undefined) {
+                        hash[startXBlock + i] = {}
+                    }
+                    if (hash[startXBlock + i][startYBlock + j] == undefined) {
+                        hash[startXBlock + i][startYBlock + j] = {}
+                    }
+                    if (hash[startXBlock + i][startYBlock + j][startZBlock + k] == undefined) {
+                        hash[startXBlock + i][startYBlock + j][startZBlock + k] = []
+                    }
+                    hash[startXBlock + i][startYBlock + j][startZBlock + k].push(gameObject)
+                    gameObject.spatialHashBuckets.push(hash[startXBlock + i][startYBlock + j][startZBlock + k])
+                }
+            }
         }
     }
+
+
 
     hitByAsteroid() {
         console.log("Hit by asteroid")
@@ -392,9 +452,14 @@ class Game {
 
     createCrates(numCrates) {
         console.log("Creating crates");
+        var origin = new Vector3(0,0,0)
         for (var i = 0; i < numCrates; i++) {
             var deltaRotation = Vector3.random(0, 1); // Rotation speed for the crate
-            var crate = new Crate("crate" + i, Vector3.random(-this.fieldSize/2, this.fieldSize/2), this.textureLoader.getTexture("crate"), deltaRotation);
+            var asteroidPos = Vector3.random(-this.fieldSize/2, this.fieldSize/2)
+            while (asteroidPos.distance(origin) < 10) {
+                asteroidPos = Vector3.random(-this.fieldSize/2, this.fieldSize/2)
+            }
+            var crate = new Crate("crate" + i, asteroidPos, this.textureLoader.getTexture("crate"), deltaRotation);
             this.addGameObject(crate);
         }
     }

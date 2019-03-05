@@ -97,10 +97,14 @@ class Player extends MeshObject {
 
     onCollisionEnter(other) {
         if (other.tag == "Asteroid") {
+            if (this.iFrames >= 0) {
+                return
+            }
+            Game.instance.hitByAsteroid()
+            Camera.instance.shake(.5);
             this.velocity.scale(0);
             var forceDir = this.transform.position.difference(other.transform.position)
             forceDir.scale(2)
-            console.log(forceDir)
             this.addForce(forceDir)
         }
     }

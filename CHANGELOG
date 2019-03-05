@@ -39,3 +39,7 @@
 ## 0.0.6
 * Using quaternions to represent gameobject rotations
 * Updating skybox texture to a simpler texture that repeats more smoothly
+
+## 0.0.7
+* Using spatial hash to only calculate collisions between objects that are nearby
+* Improving collision between player and asteroids to be more realistic

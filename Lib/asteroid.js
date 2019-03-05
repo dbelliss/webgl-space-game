@@ -36,18 +36,17 @@ class Asteroid extends MeshObject{
 
     onCollisionEnter(other) {
         if (other.tag == "Player") {
-            Game.instance.hitByAsteroid()
+           if (other.iFrames >= 0) {
+                return
+            }
             var forceDir = this.transform.position.difference(other.transform.position)
             forceDir.scale(100)
-            console.log(forceDir)
             this.addForce(forceDir)
         }
         if (other.tag == "Asteroid") {
-            Game.instance.hitByAsteroid()
             var forceDir = this.transform.position.difference(other.transform.position)
             forceDir.scale(other.mass)
             this.addForce(forceDir)
-            other.velocity.scale(0);
         }
         if (other.tag == "Laser") {
             var forceDir = this.transform.position.difference(other.transform.position)
