@@ -256,6 +256,13 @@ class Game {
                 if (this.player.collider.isCollidingWith(crate.collider)) {
                     crate.onCollisionEnter(this.player);
                 }
+                for (var j = 0; j < this.activeGameObjects["Laser"].length; j++) {
+                    var laser = this.activeGameObjects["Laser"][j];
+                    if (laser.collider.isCollidingWith(crate.collider)) {
+                        crate.onCollisionEnter(laser);
+                        laser.onCollisionEnter(crate);
+                    }
+                }
             }
             for (var i = 0; i < activeGameObjects["Asteroid"].length; i++) {
                 var asteroid = activeGameObjects["Asteroid"][i]
@@ -263,6 +270,14 @@ class Game {
                     if (this.player.collider.isCollidingWith(asteroid.collider)) {
                         Camera.instance.shake(.5);
                         asteroid.onCollisionEnter(this.player);
+                        this.player.onCollisionEnter(asteroid)
+                    }
+                }
+                for (var j = 0; j < this.activeGameObjects["Laser"].length; j++) {
+                    var laser = this.activeGameObjects["Laser"][j];
+                    if (laser.collider.isCollidingWith(asteroid.collider)) {
+                        asteroid.onCollisionEnter(laser);
+                        laser.onCollisionEnter(asteroid);
                     }
                 }
             }

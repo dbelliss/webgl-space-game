@@ -11,9 +11,10 @@ class GameObject {
         this.transform = new Transform(position);
         this.mass = 1
         this.velocity = new Vector3(0, 0, 0)
-        this.drag = .05;
+        this.drag = .001;
         this.maxSpeed = 50
         this.isDestroyed = false; // If this is true, object will be destroyed on next fixedUpdate
+        this.epsilon = .01
     }
 
     /**
