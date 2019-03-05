@@ -47,7 +47,7 @@ class TextureProgram extends Program {
 
         glMatrix.mat4.identity(this.worldMatrix);
         glMatrix.mat4.lookAt(this.viewMatrix, [0, -20, 10], [0, 0, 0], [0, 1, 0]);
-        glMatrix.mat4.perspective(this.projMatrix, glMatrix.glMatrix.toRadian(45), aspectRatio, 1, Game.instance.fieldSize * 2);
+        glMatrix.mat4.perspective(this.projMatrix, glMatrix.glMatrix.toRadian(45), aspectRatio, 1, Game.instance.fieldSize * 4);
         gl.uniformMatrix4fv(this.matWorldUniformLocation, gl.FALSE, this.worldMatrix);
         gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, this.viewMatrix);
         gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, this.projMatrix);

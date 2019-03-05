@@ -15,6 +15,7 @@ class GameObject {
         this.maxSpeed = 50
         this.isDestroyed = false; // If this is true, object will be destroyed on next fixedUpdate
         this.epsilon = .01
+        this.spatialHashBuckets = []
     }
 
     /**
@@ -39,8 +40,34 @@ class GameObject {
         }
         if (!(this.velocity.x == 0 && this.velocity.y == 0 && this.velocity.z == 0)) {
             this.transform.position.add(this.velocity.scaled(deltaTime));
-            this.applyDrag()
+            this.applyDrag();
+            this.updateSpatialHash();
         }
+    }
+
+
+
+    removeFromSpatialHash() {
+        for (var i = 0; i < this.spatialHashBuckets.length; i++) {
+            var array = this.spatialHashBuckets[i]
+            for(var j = 0; j < array.length; j++){
+                if (array[j] === this) {
+                    array.splice(j, 1);
+                }
+            }
+            if (this.spatialHashBuckets[i].length == 0) {
+                this.spatialHashBuckets.splice(i, 1);
+                i -= 1;
+            }
+        }
+    }
+    destroy() {
+        this.removeFromSpatialHash();
+    }
+
+    updateSpatialHash() {
+        this.removeFromSpatialHash()
+        Game.instance.addToSpatialHash(Game.instance.spatialHash, this, Game.instance.cellSize)
     }
 
     /**
