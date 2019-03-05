@@ -74,15 +74,17 @@ class Player extends MeshObject {
         this.moveDir.z = newMoveDir[2]
 
         // Normalize velocity, and scale by expected speed
-        var magnitude = this.velocity.magnitude()
-        this.velocity = this.moveDir.scaled(magnitude)
+        if (this.iFrames < 0) {
+            var magnitude = this.velocity.magnitude()
+             this.velocity = this.moveDir.scaled(magnitude)
 
-        // Don't apply drag if the player is pressing the gas pedal
-        var shouldMove = InputManager.isKeyPressed("space");
-        if (shouldMove) {
-            this.addForce(this.moveDir.scaled(this.thrust));
+            // Don't apply drag if the player is pressing the gas pedal
+            var shouldMove = InputManager.isKeyPressed("space");
+            if (shouldMove) {
+
+                this.addForce(this.moveDir.scaled(this.thrust));
+            }
         }
-        console.log(this.velocity)
 
 
         super.fixedUpdate(deltaTime)
@@ -97,7 +99,7 @@ class Player extends MeshObject {
         if (other.tag == "Asteroid") {
             this.velocity.scale(0);
             var forceDir = this.transform.position.difference(other.transform.position)
-            forceDir.scale(100)
+            forceDir.scale(2)
             console.log(forceDir)
             this.addForce(forceDir)
         }
