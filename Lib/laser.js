@@ -16,6 +16,8 @@ class Laser extends MeshObject{
         this.transform.rotation = rotation
         this.transform.scale.scale(.3)
         this.transform.scale.y *= 3
+
+        this.collider = new BoxCollider(this.transform.position, 1, 1, 1);
     }
 
     fixedUpdate(deltaTime) {
@@ -25,6 +27,21 @@ class Laser extends MeshObject{
         if (this.despawnTime <= 0) {
             console.log("Despawning laser");
             this.isDestroyed = true;
+        }
+    }
+
+    onCollisionEnter(other) {
+        if (other.tag == "Enemy") {
+            console.log("Laser hit enemy")
+            this.isDestroyed = true
+        }
+        else if (other.tag == "Asteroid") {
+            console.log("Laser hit asteroid");
+            this.isDestroyed = true
+        }
+        else if (other.tag == "Crate") {
+            console.log("Laser hit crate");
+            this.isDestroyed = true
         }
     }
 }

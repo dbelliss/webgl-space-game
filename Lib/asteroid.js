@@ -27,6 +27,7 @@ class Asteroid extends MeshObject{
         // Set size of asteroid
         this.transform.scale = new Vector3(.05, .05, .04)
         var scaleFactor = 1 + Math.floor(Math.random() * 8)
+        this.mass = (4/3) * Math.PI * (Math.pow(scaleFactor - .99, 3))
         this.transform.scale.scale(scaleFactor)
 
         // Add sphere collider
@@ -36,6 +37,22 @@ class Asteroid extends MeshObject{
     onCollisionEnter(other) {
         if (other.tag == "Player") {
             Game.instance.hitByAsteroid()
+            var forceDir = this.transform.position.difference(other.transform.position)
+            forceDir.scale(100)
+            console.log(forceDir)
+            this.addForce(forceDir)
+        }
+        if (other.tag == "Asteroid") {
+            Game.instance.hitByAsteroid()
+            var forceDir = this.transform.position.difference(other.transform.position)
+            forceDir.scale(other.mass)
+            this.addForce(forceDir)
+            other.velocity.scale(0);
+        }
+        if (other.tag == "Laser") {
+            var forceDir = this.transform.position.difference(other.transform.position)
+            forceDir.scale(5)
+            this.addForce(forceDir)
         }
     }
 

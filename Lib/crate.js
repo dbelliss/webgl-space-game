@@ -31,6 +31,11 @@ class Crate extends GameObject{
             console.log("Crate!");
             Game.instance.crateCollected()
         }
+        if (other.tag == "Laser") {
+            var forceDir = this.transform.position.difference(other.transform.position)
+            forceDir.scale(5)
+            this.addForce(forceDir)
+        }
     }
 
     generateTexturedBox() {

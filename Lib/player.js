@@ -31,6 +31,8 @@ class Player extends MeshObject {
         glMatrix.quat.fromEuler(this.localYAxis, 0, 1, 0)
         this.localZAxis = new Float32Array(4)
         glMatrix.quat.fromEuler(this.localZAxis, 0, 0, 1)
+
+        this.drag = .2
     }
 
     /**
@@ -78,18 +80,26 @@ class Player extends MeshObject {
         // Don't apply drag if the player is pressing the gas pedal
         var shouldMove = InputManager.isKeyPressed("space");
         if (shouldMove) {
-            this.drag = 0
             this.addForce(this.moveDir.scaled(this.thrust));
         }
-        else {
-            this.drag = .2
-        }
+        console.log(this.velocity)
+
 
         super.fixedUpdate(deltaTime)
 
         // Handle laser firing
         if (InputManager.isKeyPressed("F") && this.curCoolDown < 0) {
             Game.instance.fireLaser()
+        }
+    }
+
+    onCollisionEnter(other) {
+        if (other.tag == "Asteroid") {
+            this.velocity.scale(0);
+            var forceDir = this.transform.position.difference(other.transform.position)
+            forceDir.scale(100)
+            console.log(forceDir)
+            this.addForce(forceDir)
         }
     }
 }
