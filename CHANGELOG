@@ -35,3 +35,7 @@
 
 ## 0.0.5r1
 * Fixing bug with incorrect letter case for path to file
+
+## 0.0.6
+* Using quaternions to represent gameobject rotations
+* Updating skybox texture to a simpler texture that repeats more smoothly
