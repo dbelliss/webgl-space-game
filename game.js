@@ -32,11 +32,9 @@ class Game {
         this.asteroidIcon = new UIImage(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', 20, 75, 50, 50)
 
         var goFunction = function() {
-            console.log("Im going!");
             Game.instance.shouldMove = true
         }
         var goReleaseFunction = function() {
-            console.log("Im going!");
             Game.instance.shouldMove = false
         }
         var laserFunction = function() {
@@ -165,7 +163,7 @@ class Game {
 
     constructor(asteroidJson, rocketJson, laserJson) {
         Game.instance = this
-        this.touchControlsEnabled = true;
+        this.touchControlsEnabled = false;
         this.laserJson = laserJson;
         this.fieldSize = 500
         this.canvasHeight = 800;

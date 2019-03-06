@@ -27,3 +27,6 @@ A simple game in WebGL without using any frameworks to manage the graphics like 
 * https://www.dafont.com/nasalization.font
 * https://www.gamedev.net/forums/topic/300428-sphere-box-collision/
 * https://freesound.org/people/sandyrb/sounds/95078/
+* https://icon-icons.com/icon/laser-beam/4914
+* https://freesound.org/people/wcoltd/sounds/417730/
+* https://freesound.org/people/deleted_user_7146007/sounds/383654/
