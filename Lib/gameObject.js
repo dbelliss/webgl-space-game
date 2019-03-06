@@ -31,7 +31,6 @@ class GameObject {
      * @param {deltaTime} float for the amount of seconds that have passed since the last fixedUpdate
      */
     fixedUpdate(deltaTime) {
-
         var speed = this.velocity.magnitude()
 
         if (speed > this.maxSpeed) {

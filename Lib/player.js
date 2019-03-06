@@ -45,7 +45,13 @@ class Player extends MeshObject {
         this.iFrames -= deltaTime
         this.curCoolDown -= deltaTime
 
-        var input = InputManager.readInput().scaled(this.turnPower)
+        if (Game.instance.touchControlsEnabled) {
+            var input = InputManager.readTouchInput().scaled(this.turnPower)
+        }
+        else {
+            var input = InputManager.readKeyboardInput().scaled(this.turnPower)
+        }
+
         this.deltaX = input.x
         this.deltaZ = input.y
 
@@ -79,9 +85,8 @@ class Player extends MeshObject {
              this.velocity = this.moveDir.scaled(magnitude)
 
             // Don't apply drag if the player is pressing the gas pedal
-            var shouldMove = InputManager.isKeyPressed("space");
+            var shouldMove = InputManager.shouldMove();
             if (shouldMove) {
-
                 this.addForce(this.moveDir.scaled(this.thrust));
             }
         }
@@ -90,7 +95,7 @@ class Player extends MeshObject {
         super.fixedUpdate(deltaTime)
 
         // Handle laser firing
-        if (InputManager.isKeyPressed("F") && this.curCoolDown < 0) {
+        if (InputManager.shouldFireLaser() && this.curCoolDown < 0) {
             Game.instance.fireLaser()
         }
     }
