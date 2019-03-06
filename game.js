@@ -19,34 +19,15 @@ class Game {
     }
 
     loadHUD() {
-
         this.canvas2d = document.getElementById('hud');
         this.context2dCtx = this.canvas2d.getContext('2d');;
-
 
         this.numCratesCollected = 0
         this.numAsteroidsCollidedWith = 0
 
-
         this.crateIcon = new UIImage(this.context2dCtx, 'Assets/Textures/crate.png', 20, 20, 50, 50)
         this.asteroidIcon = new UIImage(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', 20, 75, 50, 50)
 
-        var goFunction = function() {
-            Game.instance.shouldMove = true
-        }
-        var goReleaseFunction = function() {
-            Game.instance.shouldMove = false
-        }
-        var laserFunction = function() {
-            Game.instance.shouldFireLaser = true
-        }
-
-        var canvasHeight = this.canvasHeight;
-        var canvasWidth = this.canvasWidth;
-        this.goButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 150, 100, 100, goFunction, goReleaseFunction)
-        this.laserButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 300, 100, 100, laserFunction)
-
-        this.buttons = [this.goButton, this.laserButton]
         this.updateHUD()
     }
 
@@ -96,9 +77,32 @@ class Game {
     }
 
     initializeTouchControls() {
+        if (this.touchControlsInitialized) {
+            return;
+        }
+        this.touchControlsInitialized = true;
         document.addEventListener("touchstart", touchStartHandler);
         document.addEventListener("touchmove", touchHandler);
         document.addEventListener("touchend", touchEndHandler);
+
+        var goFunction = function() {
+            Game.instance.shouldMove = true
+        }
+        var goReleaseFunction = function() {
+            Game.instance.shouldMove = false
+        }
+        var laserFunction = function() {
+            Game.instance.shouldFireLaser = true
+        }
+
+        var canvasHeight = this.canvasHeight;
+        var canvasWidth = this.canvasWidth;
+
+
+        this.goButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 150, 100, 100, goFunction, goReleaseFunction)
+        this.laserButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 300, 100, 100, laserFunction)
+        this.buttons = [this.goButton, this.laserButton]
+
         this.touchStartX = 0
         this.touchStartY = 0
         this.deltaX = 0
@@ -148,22 +152,42 @@ class Game {
 
         function touchHandler(e) {
             if(e.touches) {
-
                 var playerX = e.touches[0].pageX - canvas.offsetLeft;
                 var playerY = e.touches[0].pageY - canvas.offsetTop;
                 if (playerX <= canvas.width && playerX >= 0 && playerY >= 0 && playerY <= canvas.height) {
                     Game.instance.deltaX = playerX - Game.instance.touchStartX
                     Game.instance.deltaY = playerY - Game.instance.touchStartY
-                    console.log(`(${Game.instance.deltaX}, ${Game.instance.deltaY})`)
                     e.preventDefault();
                 }
             }
         }
     }
 
+    enableTouchControls() {
+        console.log("Enabling touch controls");
+        this.initializeTouchControls();
+        this.touchControlsEnabled = true;
+        this.updateHUD();
+    }
+
+    disableTouchControls() {
+        console.log("Disabling touch controls");
+        this.touchControlsEnabled = false;
+        this.updateHUD();
+    }
+
     constructor(asteroidJson, rocketJson, laserJson) {
         Game.instance = this
         this.touchControlsEnabled = false;
+        this.touchControlsCheckbox = document.getElementById("touchControlsEnabledCheckBox");
+        this.touchControlsCheckbox.onclick = function() {
+            if (Game.instance.touchControlsCheckbox.checked) {
+                Game.instance.enableTouchControls();
+            }
+            else {
+                Game.instance.disableTouchControls();
+            }
+        }
         this.laserJson = laserJson;
         this.fieldSize = 500
         this.canvasHeight = 800;
@@ -440,8 +464,6 @@ class Game {
             }
         }
     }
-
-
 
     hitByAsteroid() {
         console.log("Hit by asteroid")
