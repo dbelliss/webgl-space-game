@@ -27,28 +27,49 @@ class Game {
         this.numCratesCollected = 0
         this.numAsteroidsCollidedWith = 0
 
+
+        this.crateIcon = new UIImage(this.context2dCtx, 'Assets/Textures/crate.png', 20, 20, 50, 50)
+        this.asteroidIcon = new UIImage(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', 20, 75, 50, 50)
+
+        var goFunction = function() {
+            console.log("Im going!");
+            Game.instance.shouldMove = true
+        }
+        var goReleaseFunction = function() {
+            console.log("Im going!");
+            Game.instance.shouldMove = false
+        }
+        var laserFunction = function() {
+            Game.instance.shouldFireLaser = true
+        }
+
+        var canvasHeight = this.canvasHeight;
+        var canvasWidth = this.canvasWidth;
+        this.goButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 150, 100, 100, goFunction, goReleaseFunction)
+        this.laserButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 300, 100, 100, laserFunction)
+
+        this.buttons = [this.goButton, this.laserButton]
         this.updateHUD()
     }
 
     updateHUD() {
         console.log("Updating HUD");
-        var crateImage = new Image();
-        crateImage.src = 'Assets/Textures/crate.png';
+        var canvasHeight = this.canvasHeight;
+        var canvasWidth = this.canvasWidth;
+
         var context2dCtx = this.context2dCtx;
         context2dCtx.clearRect(0, 0,  this.canvas2d.width,  this.canvas2d.height);
-        crateImage.onload = function() {
-            context2dCtx.drawImage(crateImage, 20, 20, 50, 50);
-        }
 
-        var asteroidImage = new Image();
-        asteroidImage.src = 'Assets/Textures/rocky-texture.jpg';
-        asteroidImage.onload = function() {
-            context2dCtx.drawImage(asteroidImage, 20, 75, 50, 50);
+        this.crateIcon.draw();
+        this.asteroidIcon.draw();
+
+        if (this.touchControlsEnabled) {
+            this.goButton.draw();
+            this.laserButton.draw();
         }
 
         context2dCtx.font = "40px Nasalization";
         context2dCtx.fillStyle = "white";
-        context2dCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight );
         context2dCtx.textAlign = "left";
         context2dCtx.fillText("x" + this.numCratesCollected, 80, 55);
         context2dCtx.fillText("x" + this.numAsteroidsCollidedWith, 80, 110);
@@ -76,12 +97,79 @@ class Game {
         this.audioManager.playSound(SoundsEnum.PICKUP);
     }
 
+    initializeTouchControls() {
+        document.addEventListener("touchstart", touchStartHandler);
+        document.addEventListener("touchmove", touchHandler);
+        document.addEventListener("touchend", touchEndHandler);
+        this.touchStartX = 0
+        this.touchStartY = 0
+        this.deltaX = 0
+        this.deltaY = 0
+        var canvas = this.canvas
+        this.touches = {}
+        function touchStartHandler(e) {
+            if(e.touches) {
+                var playerX = e.touches[0].pageX - canvas.offsetLeft;
+                var playerY = e.touches[0].pageY - canvas.offsetTop;
+                if (playerX <= canvas.width && playerX >= 0 && playerY >= 0 && playerY <= canvas.height) {
+                    console.log("Touch start");
+
+                    var buttons = Game.instance.buttons;
+                    for (var i = 0; i < buttons.length; i++) {
+                        var button = buttons[i]
+                        if (button.isTouched(playerX, playerY)) {
+                            button.onTouch();
+                            Game.instance.touches[e.changedTouches[0].identifier] = button
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+
+                    Game.instance.touchStartX = playerX
+                    Game.instance.touchStartY = playerY
+                    Game.instance.deltaX = 0
+                    Game.instance.deltaY = 0
+                    console.log("Touch: "+ " x: " + playerX + ", y: " + playerY);
+                    e.preventDefault();
+                }
+            }
+        }
+
+        function touchEndHandler(e) {
+            console.log("Touch end");
+            Game.instance.touchStartX = 0
+            Game.instance.touchStartY = 0
+            Game.instance.deltaX = 0
+            Game.instance.deltaY = 0
+            if (Game.instance.touches[e.changedTouches[0].identifier] != undefined) {
+                // If this touch started on a button, call the onRelease function on it
+                Game.instance.touches[e.changedTouches[0].identifier].onRelease()
+                Game.instance.touches[e.changedTouches[0].identifier] = undefined
+            }
+        }
+
+        function touchHandler(e) {
+            if(e.touches) {
+
+                var playerX = e.touches[0].pageX - canvas.offsetLeft;
+                var playerY = e.touches[0].pageY - canvas.offsetTop;
+                if (playerX <= canvas.width && playerX >= 0 && playerY >= 0 && playerY <= canvas.height) {
+                    Game.instance.deltaX = playerX - Game.instance.touchStartX
+                    Game.instance.deltaY = playerY - Game.instance.touchStartY
+                    console.log(`(${Game.instance.deltaX}, ${Game.instance.deltaY})`)
+                    e.preventDefault();
+                }
+            }
+        }
+    }
+
     constructor(asteroidJson, rocketJson, laserJson) {
         Game.instance = this
+        this.touchControlsEnabled = true;
         this.laserJson = laserJson;
         this.fieldSize = 500
         this.canvasHeight = 800;
-        this.canvasWidth = 800;
+        this.canvasWidth = 1000;
         window.onkeydown = function(e) {
             return !(e.keyCode == 32);
         };
@@ -97,6 +185,9 @@ class Game {
             return;
         }
 
+        if (this.touchControlsEnabled) {
+            this.initializeTouchControls();
+        }
 
         this.loadHUD();
 

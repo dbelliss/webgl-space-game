@@ -43,3 +43,6 @@
 ## 0.0.7
 * Using spatial hash to only calculate collisions between objects that are nearby
 * Improving collision between player and asteroids to be more realistic
+
+## 0.0.8
+* Basic touch controls for rotation, movement, and laser
