@@ -1,8 +1,8 @@
 class UIButton extends UIImage{
     constructor(canvasContext, imagePath, x, y, width, height, onTouch, onRelease) {
         super(canvasContext, imagePath, x, y, width, height)
-        this.onTouch = onTouch
-        this.onRelease = onRelease
+        this.onTouchFunc = onTouch
+        this.onReleaseFunc = onRelease
     }
 
     isTouched (touchX, touchY) {
@@ -11,10 +11,12 @@ class UIButton extends UIImage{
     }
 
     onTouch() {
-        this.onTouch();
+        this.onTouchFunc();
     }
 
     onRelease() {
-        this.onRelease();
+        if (this.onReleaseFunc != undefined) {
+            this.onReleaseFunc();
+        }
     }
 }

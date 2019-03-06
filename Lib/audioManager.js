@@ -44,6 +44,12 @@ class AudioManager {
             laserSoundPool.push(new Audio("./Assets/Audio/laser.wav"));
         }
         this.sounds[SoundsEnum.LASER] = laserSoundPool;
+
+        var laserHitSoundPool = []
+        for (var i = 0; i < 2; i++) {
+            laserHitSoundPool.push(new Audio("./Assets/Audio/empHit.wav"));
+        }
+        this.sounds[SoundsEnum.LASER_HIT] = laserHitSoundPool;
     }
 
     /**
