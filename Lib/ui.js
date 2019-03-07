@@ -26,8 +26,8 @@ class UI {
 
         var canvasHeight = Game.instance.canvasHeight;
         var canvasWidth = Game.instance.canvasWidth;
-        this.goButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 150, 100, 100, TouchControlManager.instance.goFunction, TouchControlManager.instance.goReleaseFunction, false)
-        this.laserButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 300, 100, 100, TouchControlManager.instance.laserFunction, undefined, false)
+        this.goButton = new UIButton(this.context2dCtx, 'Assets/Textures/RocketGo.png', canvasWidth - 150, canvasHeight - 150, 100, 100, TouchControlManager.instance.goFunction, TouchControlManager.instance.goReleaseFunction, false)
+        this.laserButton = new UIButton(this.context2dCtx, 'Assets/Textures/laserBeamIcon.png', canvasWidth - 150, canvasHeight - 300, 100, 100, TouchControlManager.instance.laserFunction, undefined, false)
         this.buttons = [this.goButton, this.laserButton]
 
         this.updateHUD()
