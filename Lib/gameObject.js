@@ -44,8 +44,6 @@ class GameObject {
         }
     }
 
-
-
     removeFromSpatialHash() {
         for (var i = 0; i < this.spatialHashBuckets.length; i++) {
             var array = this.spatialHashBuckets[i]
@@ -60,13 +58,14 @@ class GameObject {
             }
         }
     }
+
     destroy() {
         this.removeFromSpatialHash();
     }
 
     updateSpatialHash() {
         this.removeFromSpatialHash()
-        Game.instance.addToSpatialHash(Game.instance.spatialHash, this, Game.instance.cellSize)
+        CollisionManager.instance.addToSpatialHash(this)
     }
 
     /**

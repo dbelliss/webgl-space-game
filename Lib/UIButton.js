@@ -1,6 +1,6 @@
 class UIButton extends UIImage{
-    constructor(canvasContext, imagePath, x, y, width, height, onTouch, onRelease) {
-        super(canvasContext, imagePath, x, y, width, height)
+    constructor(canvasContext, imagePath, x, y, width, height, onTouch, onRelease, enabled) {
+        super(canvasContext, imagePath, x, y, width, height, enabled)
         this.onTouchFunc = onTouch
         this.onReleaseFunc = onRelease
     }

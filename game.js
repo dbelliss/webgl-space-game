@@ -1,7 +1,6 @@
 "use strict";
 
 function Initialize() {
-
     loadJSONResource('./Assets/Models/Asteroid.json', function (modelErr, asteroidObj) {
         loadJSONResource('./Assets/Models/rocket.json', function (modelErr, rocketObj) {
             loadJSONResource('./Assets/Models/laser.json', function (modelErr, laserObj) {
@@ -18,206 +17,44 @@ class Game {
         this.projMatrix = new Float32Array(16);
     }
 
-    loadHUD() {
-        this.canvas2d = document.getElementById('hud');
-        this.context2dCtx = this.canvas2d.getContext('2d');;
-
-        this.numCratesCollected = 0
-        this.numAsteroidsCollidedWith = 0
-
-        this.crateIcon = new UIImage(this.context2dCtx, 'Assets/Textures/crate.png', 20, 20, 50, 50)
-        this.asteroidIcon = new UIImage(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', 20, 75, 50, 50)
-
-        this.updateHUD()
-    }
-
-    updateHUD() {
-        console.log("Updating HUD");
-        var canvasHeight = this.canvasHeight;
-        var canvasWidth = this.canvasWidth;
-
-        var context2dCtx = this.context2dCtx;
-        context2dCtx.clearRect(0, 0,  this.canvas2d.width,  this.canvas2d.height);
-
-        this.crateIcon.draw();
-        this.asteroidIcon.draw();
-
-        if (this.touchControlsEnabled) {
-            this.goButton.draw();
-            this.laserButton.draw();
-        }
-
-        context2dCtx.font = "40px Nasalization";
-        context2dCtx.fillStyle = "white";
-        context2dCtx.textAlign = "left";
-        context2dCtx.fillText("x" + this.numCratesCollected, 80, 55);
-        context2dCtx.fillText("x" + this.numAsteroidsCollidedWith, 80, 110);
-
-        context2dCtx.textAlign = "right";
-        context2dCtx.fillText("Score: " + this.calculateScore(), 950, 55);
-
-        if (this.isPlayerOutOfBounds()) {
-            context2dCtx.fillStyle = "red";
-            context2dCtx.textAlign = "center";
-            context2dCtx.fillText("Warning: Leaving Collection Area", 500, 200);
-        }
-    }
-
-    calculateScore() {
-        var score = 0
-        score += this.numCratesCollected * 50
-        score -= this.numAsteroidsCollidedWith * 20
-        return score
-    }
-
-    crateCollected() {
-        this.numCratesCollected += 1;
-        this.updateHUD();
-        this.audioManager.playSound(SoundsEnum.PICKUP);
-    }
-
-    initializeTouchControls() {
-        if (this.touchControlsInitialized) {
-            return;
-        }
-        this.touchControlsInitialized = true;
-        document.addEventListener("touchstart", touchStartHandler);
-        document.addEventListener("touchmove", touchHandler);
-        document.addEventListener("touchend", touchEndHandler);
-
-        var goFunction = function() {
-            Game.instance.shouldMove = true
-        }
-        var goReleaseFunction = function() {
-            Game.instance.shouldMove = false
-        }
-        var laserFunction = function() {
-            Game.instance.shouldFireLaser = true
-        }
-
-        var canvasHeight = this.canvasHeight;
-        var canvasWidth = this.canvasWidth;
-
-
-        this.goButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 150, 100, 100, goFunction, goReleaseFunction)
-        this.laserButton = new UIButton(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', canvasWidth - 150, canvasHeight - 300, 100, 100, laserFunction)
-        this.buttons = [this.goButton, this.laserButton]
-
-        this.touchStartX = 0
-        this.touchStartY = 0
-        this.deltaX = 0
-        this.deltaY = 0
-        var canvas = this.canvas
-        this.touches = {}
-        function touchStartHandler(e) {
-            if(e.touches) {
-                var playerX = e.touches[0].pageX - canvas.offsetLeft;
-                var playerY = e.touches[0].pageY - canvas.offsetTop;
-                if (playerX <= canvas.width && playerX >= 0 && playerY >= 0 && playerY <= canvas.height) {
-                    console.log("Touch start");
-
-                    var buttons = Game.instance.buttons;
-                    for (var i = 0; i < buttons.length; i++) {
-                        var button = buttons[i]
-                        if (button.isTouched(playerX, playerY)) {
-                            button.onTouch();
-                            Game.instance.touches[e.changedTouches[0].identifier] = button
-                            e.preventDefault();
-                            return;
-                        }
-                    }
-
-                    Game.instance.touchStartX = playerX
-                    Game.instance.touchStartY = playerY
-                    Game.instance.deltaX = 0
-                    Game.instance.deltaY = 0
-                    console.log("Touch: "+ " x: " + playerX + ", y: " + playerY);
-                    e.preventDefault();
-                }
-            }
-        }
-
-        function touchEndHandler(e) {
-            console.log("Touch end");
-            Game.instance.touchStartX = 0
-            Game.instance.touchStartY = 0
-            Game.instance.deltaX = 0
-            Game.instance.deltaY = 0
-            if (Game.instance.touches[e.changedTouches[0].identifier] != undefined) {
-                // If this touch started on a button, call the onRelease function on it
-                Game.instance.touches[e.changedTouches[0].identifier].onRelease()
-                Game.instance.touches[e.changedTouches[0].identifier] = undefined
-            }
-        }
-
-        function touchHandler(e) {
-            if(e.touches) {
-                var playerX = e.touches[0].pageX - canvas.offsetLeft;
-                var playerY = e.touches[0].pageY - canvas.offsetTop;
-                if (playerX <= canvas.width && playerX >= 0 && playerY >= 0 && playerY <= canvas.height) {
-                    Game.instance.deltaX = playerX - Game.instance.touchStartX
-                    Game.instance.deltaY = playerY - Game.instance.touchStartY
-                    e.preventDefault();
-                }
-            }
-        }
-    }
-
-    enableTouchControls() {
-        console.log("Enabling touch controls");
-        this.initializeTouchControls();
-        this.touchControlsEnabled = true;
-        this.updateHUD();
-    }
-
-    disableTouchControls() {
-        console.log("Disabling touch controls");
-        this.touchControlsEnabled = false;
-        this.updateHUD();
-    }
-
     constructor(asteroidJson, rocketJson, laserJson) {
         Game.instance = this
-        this.touchControlsEnabled = false;
-        this.touchControlsCheckbox = document.getElementById("touchControlsEnabledCheckBox");
-        this.touchControlsCheckbox.onclick = function() {
-            if (Game.instance.touchControlsCheckbox.checked) {
-                Game.instance.enableTouchControls();
-            }
-            else {
-                Game.instance.disableTouchControls();
-            }
-        }
+
         this.laserJson = laserJson;
         this.fieldSize = 500
-        this.canvasHeight = 800;
-        this.canvasWidth = 1000;
+
+        // Prevent spacebar from scrolling down the page
         window.onkeydown = function(e) {
             return !(e.keyCode == 32);
         };
 
-        this.initializeAudio();
-
         // Create WebGL object
         var canvas = document.getElementById('game-surface');
         this.canvas = canvas;
+
+        // Get clientHeight/Width set by the CSS
+        this.canvasHeight = canvas.clientHeight;
+        this.canvasWidth = canvas.clientWidth;
+
         this.gl = InitializeGL(canvas);
         if (this.gl == undefined) {
             console.error('Could not initialize WebGL');
             return;
         }
-
-        if (this.touchControlsEnabled) {
-            this.initializeTouchControls();
-        }
-
-        this.loadHUD();
-
         var gl = this.gl  // Shorter name
-        clearGL(gl)
+        clearGL(gl);
 
         // Initialize world, view, and proj matrixes
         this.initializeMatrices();
+
+        // Create list of all active GameObjects to act on during FixedUpdate and Render
+        // Keep similar objects in the same bucket to optimize render calls
+        this.activeGameObjects = {}
+        this.activeGameObjects["Player"] = []
+        this.activeGameObjects["Enemy"] = []
+        this.activeGameObjects["Asteroid"] = []
+        this.activeGameObjects["Crate"] = []
+        this.activeGameObjects["Laser"] = []
 
         // Load all textures
         this.textureLoader = new TextureLoader(gl)
@@ -226,21 +63,20 @@ class Game {
         this.textureProgram = new TextureProgram(gl, this.worldMatrix, this.viewMatrix, this.projMatrix, this.canvas.clientWidth / this.canvas.clientHeight)
         this.gl.useProgram(this.textureProgram.program);
 
-        // Create list of all active GameObjects to act on during FixedUpdate and Render
-        this.activeGameObjects = {}
-        this.activeGameObjects["Player"] = []
-        this.activeGameObjects["Enemy"] = []
-        this.activeGameObjects["Asteroid"] = []
-        this.activeGameObjects["Crate"] = []
-        this.activeGameObjects["Laser"] = []
-
         // Create GameObjects
         this.createPlayer(rocketJson);
 //        this.createEnemies(0, rocketJson);
-        this.createAsteroids(1000, asteroidJson);
-        this.createCrates(5000);
-        this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
+        this.createAsteroids(100, asteroidJson);
+        this.createCrates(500);
 
+        // Initialize Game Managers
+        this.touchControlManager = new TouchControlManager();
+        this.ui = new UI(document.getElementById('hud'));
+        this.collisionManager = new CollisionManager(this.activeGameObjects)
+        this.audioManager = new AudioManager();
+        this.audioManager.playSong(SongsEnum.FREEFORM)
+
+        this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
         this.skybox = new Skybox("Skybox", Vector3.random(0,0), this.textureLoader.getTexture("space"), new Vector3(0,0,0));
 
         // Render Loop
@@ -312,7 +148,6 @@ class Game {
             requestAnimationFrame(render.bind(this));
         };
         requestAnimationFrame(render.bind(this));
-        this.spatialHash = this.generateSpatialHash()
         this.beginFixedUpdateLoop();
     }
 
@@ -362,7 +197,7 @@ class Game {
             });
 
             // Check for collisions
-            var spatialHash = this.spatialHash
+            var spatialHash = this.collisionManager.spatialHash
             Object.keys(spatialHash).forEach(function(key,index) {
                 var xHash = spatialHash[key]
                 Object.keys(xHash).forEach(function(key,index) {
@@ -389,88 +224,18 @@ class Game {
         }
     }
 
-    generateSpatialHash() {
-        this.cellSize = 20
-        var cellSize = this.cellSize
-        var activeGameObjects = this.activeGameObjects
-        var hash = {}
-        var addToSpatialHash = this.addToSpatialHash
-        Object.keys(activeGameObjects).forEach(function(key,index) {
-                for (var gameObjectNum = 0; gameObjectNum < activeGameObjects[key].length; gameObjectNum++) {
-                    var gameObject = activeGameObjects[key][gameObjectNum]
-                    addToSpatialHash(hash, gameObject, cellSize)
-                }
-        });
-        return hash;
-    }
-
-    getSpatialHashBucket(hash, gameObject) {
-
-    }
-
-    addToSpatialHash(hash, gameObject, cellSize) {
-        var collider = gameObject.collider
-        var isBox = collider.isBox;
-        var isSphere = collider.isSphere;
-
-        if (isBox) {
-            var center = collider.center
-
-            // Add one because every object could be on the boundary between 2 bounding cubes
-            var xBlocks = Math.ceil(collider.xSize * 2 / cellSize)
-            var yBlocks = Math.ceil(collider.ySize * 2 / cellSize)
-            var zBlocks = Math.ceil(collider.zSize * 2 / cellSize)
-
-            var startXBlock = Math.floor((collider.center.x - collider.xSize)/cellSize)
-            var startYBlock = Math.floor((collider.center.y - collider.ySize)/cellSize)
-            var startZBlock = Math.floor((collider.center.x - collider.zSize)/cellSize)
-
-            var endXBlock = Math.ceil(startXBlock + xBlocks)
-            var endYBlock = Math.ceil(startYBlock + yBlocks)
-            var endZBlock = Math.ceil(startZBlock + zBlocks)
-        }
-        else {
-            var center = collider.center
-
-            // Add one because every object could be on the boundary between 2 bounding cubes
-            var xBlocks = Math.ceil(collider.radius * 2 / cellSize)
-            var yBlocks = Math.ceil(collider.radius * 2 / cellSize)
-            var zBlocks = Math.ceil(collider.radius * 2 / cellSize)
-
-            var startXBlock = Math.floor((collider.center.x - collider.radius)/cellSize)
-            var startYBlock = Math.floor((collider.center.y - collider.radius)/cellSize)
-            var startZBlock = Math.floor((collider.center.x - collider.radius)/cellSize)
-
-            var endXBlock = Math.ceil(startXBlock + xBlocks)
-            var endYBlock = Math.ceil(startYBlock + yBlocks)
-            var endZBlock = Math.ceil(startZBlock + zBlocks)
-        }
-        // Add gameobject to all cells that might touch
-        for (var i = 0; i < xBlocks; i++) {
-            for (var j = 0; j < yBlocks; j++) {
-                for (var k = 0; k < zBlocks; k++) {
-                    if (hash[startXBlock + i] == undefined) {
-                        hash[startXBlock + i] = {}
-                    }
-                    if (hash[startXBlock + i][startYBlock + j] == undefined) {
-                        hash[startXBlock + i][startYBlock + j] = {}
-                    }
-                    if (hash[startXBlock + i][startYBlock + j][startZBlock + k] == undefined) {
-                        hash[startXBlock + i][startYBlock + j][startZBlock + k] = []
-                    }
-                    hash[startXBlock + i][startYBlock + j][startZBlock + k].push(gameObject)
-                    gameObject.spatialHashBuckets.push(hash[startXBlock + i][startYBlock + j][startZBlock + k])
-                }
-            }
-        }
+    crateCollected() {
+        this.ui.numCratesCollected += 1;
+        this.ui.updateHUD();
+        this.audioManager.playSound(SoundsEnum.PICKUP);
     }
 
     hitByAsteroid() {
         console.log("Hit by asteroid")
         this.player.iFrames = 1
         this.audioManager.playSound(SoundsEnum.CRASH);
-        this.numAsteroidsCollidedWith += 1;
-        this.updateHUD();
+        this.ui.numAsteroidsCollidedWith += 1;
+        this.ui.updateHUD();
     }
 
     fireLaser() {
@@ -479,24 +244,6 @@ class Game {
         laserSpawnPoint.add(this.player.moveDir.scaled(5)); // Shift laser to the tip of the ship
         var laserRotation = new Float32Array(4)
         this.createLaser(this.laserJson, laserSpawnPoint, glMatrix.quat.copy(laserRotation, this.player.transform.rotation), this.player.moveDir.copy());
-        this.player.curCoolDown = this.player.laserCoolDown;
-    }
-
-    initializeAudio() {
-        var audioManager = new AudioManager();
-        this.audioManager = audioManager
-        this.audioManager.playSong(SongsEnum.FREEFORM)
-        const volumeInput = document.getElementById("musicVolumeSlider");
-
-        volumeInput.addEventListener('mouseup', function() {
-            audioManager.setMusicVolume(this.value/100)
-        });
-
-        const sfxInput = document.getElementById("sfxVolumeSlider");
-
-        sfxInput.addEventListener('mouseup', function() {
-            audioManager.setSFXVolume(this.value/100)
-        });
     }
 
     createAsteroids(numAsteroids, asteroidJson) {
