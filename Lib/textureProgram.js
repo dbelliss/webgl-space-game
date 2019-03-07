@@ -7,7 +7,7 @@ class TextureProgram extends Program {
 
     static getVertexShaderText() {
         var vertexShaderText = `
-            precision lowp float;
+            precision highp float;
             attribute vec3 vertPosition;
             attribute vec2 vertTexCoord;
             varying vec2 fragTexCoord;
@@ -26,7 +26,7 @@ class TextureProgram extends Program {
 
     static getFragmentShaderText() {
         var fragmentShaderText = `
-            precision lowp float;
+            precision highp float;
             varying vec2 fragTexCoord;
             uniform sampler2D sampler; // gl.TEXTURE0
 

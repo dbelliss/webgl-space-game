@@ -46,3 +46,7 @@
 
 ## 0.0.8
 * Basic touch controls for rotation, movement, and laser
+
+## 0.0.9
+* Refactoring code
+* Updating touch icons
