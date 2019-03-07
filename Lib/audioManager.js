@@ -1,11 +1,37 @@
 "use strict";
 
 /**
- * Class to control all audio played
+ * Singleton class to control all audio played
  * Sounds are stored in an object pool so that a sound can be overlayed on top of itself
  */
 class AudioManager {
     constructor() {
+        if (AudioManager.instance !== undefined) {
+            console.error("Error: Two instances of AudioManager were created");
+            return
+        }
+        AudioManager.instance = this
+
+        // Locate volume sliders and set callbacks
+        const volumeInput = document.getElementById("musicVolumeSlider");
+        if (volumeInput == null || volumeInput === undefined) {
+            console.error("Error: AudioManager could not locate musicVolumeSlider")
+        }
+        else {
+            volumeInput.addEventListener('mouseup', function() {
+                AudioManager.instance.setMusicVolume(this.value/100)
+            });
+        }
+        const sfxInput = document.getElementById("sfxVolumeSlider");
+        if (sfxInput == null || sfxInput === undefined) {
+            console.error("Error: AudioManager could not locate sfxVolumeSlider")
+        }
+        else {
+            sfxInput.addEventListener('mouseup', function() {
+                AudioManager.instance.setSFXVolume(this.value/100)
+            });
+        }
+
         this.musicVolume = 1;
         this.sfxVolume = 1;
         this.currentSong = null

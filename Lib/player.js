@@ -17,7 +17,7 @@ class Player extends MeshObject {
         this.moveDir = new Vector3(0,1,0)
         this.originalMoveDir = new Float32Array([0,1,0])
         this.thrust = 1
-        this.turnPower = -1.2
+        this.turnPower = -.6
         this.theta = 0
         this.phi = 0
         this.iFrames = 0; // Invincibility frames
@@ -45,7 +45,7 @@ class Player extends MeshObject {
         this.iFrames -= deltaTime
         this.curCoolDown -= deltaTime
 
-        if (Game.instance.touchControlsEnabled) {
+        if (TouchControlManager.instance.touchControlsEnabled) {
             var input = InputManager.readTouchInput().scaled(this.turnPower)
         }
         else {
@@ -97,6 +97,7 @@ class Player extends MeshObject {
         // Handle laser firing
         if (InputManager.shouldFireLaser() && this.curCoolDown < 0) {
             Game.instance.fireLaser()
+            this.curCoolDown = this.laserCoolDown;
         }
     }
 

@@ -28,27 +28,29 @@ class InputManager {
     }
 
     static readTouchInput() {
-        var minSensitivity = Game.instance.canvas.width / 8
-        var maxSensitivity = Game.instance.canvas.width / 2
+        var minSensitivity = Game.instance.canvasWidth / 8
+        var maxSensitivity = Game.instance.canvasWidth / 2
         var transformVector = new Vector3(0,0,0)
-        if(Game.instance.deltaY > minSensitivity) {
-            var power = Math.min(maxSensitivity, Game.instance.deltaY)
+        var deltaY = TouchControlManager.instance.deltaY;
+        var deltaX = TouchControlManager.instance.deltaX;
+        if(deltaY > minSensitivity) {
+            var power = Math.min(maxSensitivity, deltaY)
             var diff = (power - minSensitivity)/(maxSensitivity - minSensitivity);
             transformVector.x += diff
         }
-        if (Game.instance.deltaY < -minSensitivity) {
-            var power = Math.min(maxSensitivity, -Game.instance.deltaY)
+        if (deltaY < -minSensitivity) {
+            var power = Math.min(maxSensitivity, -deltaY)
             var diff = (power - minSensitivity)/(maxSensitivity - minSensitivity);
             transformVector.x -= diff
         }
 
-        if(Game.instance.deltaX > minSensitivity) {
-            var power = Math.min(maxSensitivity, Game.instance.deltaX)
+        if(deltaX > minSensitivity) {
+            var power = Math.min(maxSensitivity, deltaX)
             var diff = (power - minSensitivity)/(maxSensitivity - minSensitivity);
             transformVector.y += diff
         }
-        else if (Game.instance.deltaX < -minSensitivity) {
-            var power = Math.min(maxSensitivity, -Game.instance.deltaX)
+        else if (deltaX < -minSensitivity) {
+            var power = Math.min(maxSensitivity, -deltaX)
             var diff = (power - minSensitivity)/(maxSensitivity - minSensitivity);
             transformVector.y -= diff
         }
@@ -79,7 +81,7 @@ class InputManager {
     }
 
     static shouldFireLaser() {
-        if (Game.instance.touchControlsEnabled) {
+        if (TouchControlManager.instance.touchControlsEnabled) {
             if (Game.instance.shouldFireLaser) {
                 Game.instance.shouldFireLaser = false;
                 return true
@@ -91,7 +93,7 @@ class InputManager {
     }
 
     static shouldMove() {
-        if (Game.instance.touchControlsEnabled) {
+        if (TouchControlManager.instance.touchControlsEnabled) {
             if (Game.instance.shouldMove) {
                 return true
             }
