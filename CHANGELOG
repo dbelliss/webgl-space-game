@@ -50,3 +50,7 @@
 ## 0.0.9
 * Refactoring code
 * Updating touch icons
+
+## 0.0.9r1
+* Resizing canvases
+* Fixing bug with touch controls not preventing default actions, and movement button being detected as a normal touch

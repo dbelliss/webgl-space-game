@@ -65,7 +65,7 @@ class UI {
         context2dCtx.fillText("x" + this.numAsteroidsCollidedWith, 80, 110);
 
         context2dCtx.textAlign = "right";
-        context2dCtx.fillText("Score: " + this.calculateScore(), 950, 55);
+        context2dCtx.fillText("Score: " + this.calculateScore(), canvasWidth - 100, 55);
 
         if (Game.instance.isPlayerOutOfBounds()) {
             context2dCtx.fillStyle = "red";
