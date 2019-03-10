@@ -50,9 +50,9 @@ class TouchControlManager {
             return;
         }
         this.touchControlsInitialized = true;
-        document.addEventListener("touchstart", touchStartHandler);
-        document.addEventListener("touchmove", touchHandler);
-        document.addEventListener("touchend", touchEndHandler);
+        document.addEventListener("touchstart", touchStartHandler, { passive: false });
+        document.addEventListener("touchmove", touchHandler, { passive: false });
+        document.addEventListener("touchend", touchEndHandler, { passive: false });
 
         var canvasHeight = Game.instance.canvasHeight;
         var canvasWidth = Game.instance.canvasWidth;
@@ -108,6 +108,12 @@ class TouchControlManager {
 
         function touchHandler(e) {
             if(e.touches) {
+
+                if (TouchControlManager.instance.touches[e.changedTouches[0].identifier] != undefined) {
+                    // This is a touch for a button, don't change direction
+                    e.preventDefault();
+                    return
+                }
                 var playerX = e.touches[0].pageX - canvas.offsetLeft;
                 var playerY = e.touches[0].pageY - canvas.offsetTop;
                 if (playerX <= canvasWidth && playerX >= 0 && playerY >= 0 && playerY <= canvasHeight) {
