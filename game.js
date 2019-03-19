@@ -65,7 +65,7 @@ class Game {
 
         // Create GameObjects
         this.createPlayer(rocketJson);
-//        this.createEnemies(0, rocketJson);
+        this.createEnemies(50, rocketJson);
         this.createAsteroids(100, asteroidJson);
         this.createCrates(500);
 
@@ -86,6 +86,7 @@ class Game {
         const asteroids = this.activeGameObjects["Asteroid"]
         const crates = this.activeGameObjects["Crate"]
         const lasers = this.activeGameObjects["Laser"]
+        const enemies = this.activeGameObjects["Enemy"]
         function render () {
             clearGL(this.gl);
 
@@ -108,13 +109,13 @@ class Game {
                 this.textureProgram.batchDraw(crates, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
             }
 
-//            if (this.enemies.length > 0) {
-//                var renderDataList = this.enemies[0].renderData
-//                for (var j = 0; j < renderDataList.length; j++) {
-//                    var renderData = renderDataList[j]
-//                    this.textureProgram.batchDraw(this.enemies, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
-//                }
-//            }
+            if (enemies.length > 0) {
+                var renderDataList = enemies[0].renderData
+                for (var j = 0; j < renderDataList.length; j++) {
+                    var renderData = renderDataList[j]
+                    this.textureProgram.batchDraw(enemies, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
+                }
+            }
 
             if (lasers.length > 0) {
                 var renderDataList = lasers[0].renderData
@@ -191,7 +192,9 @@ class Game {
                         activeGameObjects[key].splice(i,1);
                     }
                     else {
-                        activeGameObjects[key][i].fixedUpdate(.02)
+                        if (activeGameObjects[key][i].isActive) {
+                            activeGameObjects[key][i].fixedUpdate(.02)
+                        }
                     }
                 }
             });
@@ -235,6 +238,12 @@ class Game {
         this.player.iFrames = 1
         this.audioManager.playSound(SoundsEnum.CRASH);
         this.ui.numAsteroidsCollidedWith += 1;
+        this.ui.updateHUD();
+    }
+
+    hitRocket() {
+        console.log("Hit a rocket")
+        this.ui.numRocketsHit += 1;
         this.ui.updateHUD();
     }
 
@@ -293,6 +302,7 @@ class Game {
     }
 
     createEnemies(numEnemies, rocketJson) {
+        console.log("Creating enemies");
         var renderData = []
         var texture = this.textureLoader.getTexture("redRocket")
         for (var i = 0; i < rocketJson.meshes.length; i++) {
@@ -302,8 +312,9 @@ class Game {
             renderData.push(new RenderData(texture, vertices, indices, textureVertices))
         }
         for (var i = 0; i < numEnemies; i++) {
-            var enemy = new Rocket("Enemy " + i, new Vector3(0,i,0), renderData, this.player)
+            var enemy = new SimpleEnemyRocket("Enemy " + i, Vector3.random(-this.fieldSize/2, this.fieldSize/2), renderData, this.player)
             enemy.transform.scale.scale(.01);
+            enemy.tag = "Enemy";
             this.addGameObject(enemy, enemy.tag);
         }
     }

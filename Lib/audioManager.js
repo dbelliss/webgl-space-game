@@ -76,6 +76,12 @@ class AudioManager {
             laserHitSoundPool.push(new Audio("./Assets/Audio/empHit.wav"));
         }
         this.sounds[SoundsEnum.LASER_HIT] = laserHitSoundPool;
+
+        var powerDownPool = []
+        for (var i = 0; i < 2; i++) {
+            powerDownPool.push(new Audio("./Assets/Audio/powerDown.wav"));
+        }
+        this.sounds[SoundsEnum.POWER_DOWN] = powerDownPool;
     }
 
     /**

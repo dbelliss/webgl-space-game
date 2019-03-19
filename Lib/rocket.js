@@ -7,12 +7,20 @@
 class Rocket extends MeshObject {
     constructor(_name, position, renderData, player) {
         super(_name, position, renderData);
-        this.player = player
-        this.transform.rotation.x = 90
-        this.moveDir = new Vector3(0,0,1)
-        this.thrust = 1
-        this.turnPower = -10
-        this.baseRotation = new Vector3(this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z)
+
+        glMatrix.quat.fromEuler(this.transform.rotation, 0, 0, 0)
+        this.originalRotation = new Float32Array(4);
+        glMatrix.quat.copy(this.originalRotation, this.transform.rotation)
+        this.moveDir = new Vector3(0,1,0)
+        this.originalMoveDir = new Float32Array([0,1,0])
+        this.thrust = .5
+        this.turnPower = -.2
+        this.iFrames = 0; // Invincibility frames
+        this.laserCoolDown = 1
+        this.curCoolDown = 0
+        this.collider = new BoxCollider(this.transform.position, 2, 2, 2)
+        this.maxSpeed = 10
+        this.drag = .2
     }
 
     /**
@@ -22,41 +30,60 @@ class Rocket extends MeshObject {
      * @param {deltaTime} float for the amount of seconds that have passed since the last fixedUpdate
      */
     fixedUpdate(deltaTime) {
-        var input = this.player.transform.position.difference(this.transform.position).normalized();
-        this.transform.rotation.y = (this.transform.rotation.y + input.x) % 360
-        this.transform.rotation.x = (this.transform.rotation.x + input.y)
-        if (this.transform.rotation.x > 179) {
-            this.transform.rotation.x = -179
-        }
-        else if (this.transform.rotation.x < -179) {
-            this.transform.rotation.x = 179
-        }
-        var quat = new Float32Array(4)
-        glMatrix.quat.fromEuler(quat, [this.transform.rotation.x, this.transform.rotation.y, 0])
-        var mat = new Float32Array(16)
-        glMatrix.mat4.identity(mat)
-        var out = new Float32Array(16)
+        this.iFrames -= deltaTime
+        var input = this.getInput();
+        var deltaX = input.x
+        var deltaZ = input.y
 
-        var vec = [0,0,0];
-        glMatrix.vec3.rotateX(vec, [0,0,1], [0,0,0], (this.transform.rotation.x - 90)/ 180 * Math.PI)
-        glMatrix.vec3.rotateY(vec, vec, [0,0,0], this.transform.rotation.y / 180 * Math.PI)
-        this.moveDir = new Vector3(vec[0], vec[1], vec[2])
+        var worldX = new Float32Array(4)
+        glMatrix.quat.fromEuler(worldX, 90,0,0)
+        var worldY = new Float32Array(4)
+        glMatrix.quat.fromEuler(worldX, 0, 90,0)
+        var worldZ = new Float32Array(4)
+        glMatrix.quat.fromEuler(worldX,0,0, 90)
 
-        var x = Math.sin(this.transform.rotation.x/180 * Math.PI) * Math.cos(this.transform.rotation.y/180 * Math.PI)
-        var y = Math.sin(this.transform.rotation.x/180 * Math.PI) * Math.sin(this.transform.rotation.y/180 * Math.PI)
-        var z = Math.cos(this.transform.rotation.x/180 * Math.PI)
+        // Rotate around the local Z axis to adjust yaw
+        var deltaZRotation = new Float32Array(4)
+        glMatrix.quat.fromEuler(deltaZRotation, 0, 0, deltaZ);
+        glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, deltaZRotation)
 
-        var magnitude = this.velocity.magnitude()
-        this.velocity = this.moveDir.scaled(magnitude)
+        // Rotate around the local X axis to adjust pitch
+        var deltaXRotation = new Float32Array(4)
+        glMatrix.quat.fromEuler(deltaXRotation, deltaX, 0, 0);
+        glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, deltaXRotation)
 
-        var shouldMove = InputManager.isKeyPressed("space");
-        if (shouldMove) {
-            this.drag = 0
-            this.addForce(this.moveDir.scaled(this.thrust));
+        // Get the current move direction by rotating the original moveDir by the current player rotation
+        var newMoveDir = new Float32Array(3);
+        glMatrix.vec3.transformQuat(newMoveDir, this.originalMoveDir, this.transform.rotation)
+        this.moveDir.x = newMoveDir[0]
+        this.moveDir.y = newMoveDir[1]
+        this.moveDir.z = newMoveDir[2]
+
+        // Normalize velocity, and scale by expected speed
+        if (this.iFrames < 0) {
+            var magnitude = this.velocity.magnitude()
+             this.velocity = this.moveDir.scaled(magnitude)
+
+            // Don't apply drag if the player is pressing the gas pedal
+            var shouldMove = this.shouldMove();
+            if (shouldMove) {
+                this.addForce(this.moveDir.scaled(this.thrust));
+            }
         }
-        else {
-            this.drag = 1000
-        }
+
+
         super.fixedUpdate(deltaTime)
+    }
+
+    shouldMove() {
+        return true;
+    }
+
+    getInput() {
+        return new Vector3(0,0,0);
+    }
+
+    onCollisionEnter(other) {
+        console.log(other.tag, " Hit rocket");
     }
 }

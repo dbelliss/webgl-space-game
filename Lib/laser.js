@@ -34,7 +34,12 @@ class Laser extends MeshObject{
         if (other.tag == "Enemy") {
             console.log("Laser hit enemy")
             Game.instance.audioManager.playSound(SoundsEnum.LASER_HIT);
-            this.isDestroyed = true
+            Game.instance.audioManager.playSound(SoundsEnum.POWER_DOWN);
+            if (!other.isStunned) {
+                Game.instance.hitRocket(); // Add to score
+            }
+            other.isStunned = true;
+            this.isDestroyed = true;
         }
         else if (other.tag == "Asteroid") {
             console.log("Laser hit asteroid");
