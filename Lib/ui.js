@@ -20,9 +20,11 @@ class UI {
 
         this.numCratesCollected = 0
         this.numAsteroidsCollidedWith = 0
+        this.numRocketsHit = 0
 
         this.crateIcon = new UIImage(this.context2dCtx, 'Assets/Textures/crate.png', 20, 20, 50, 50)
         this.asteroidIcon = new UIImage(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', 20, 75, 50, 50)
+        this.rocketIcon = new UIImage(this.context2dCtx, 'Assets/Textures/rocky-texture.jpg', 20, 130, 50, 50)
 
         var canvasHeight = Game.instance.canvasHeight;
         var canvasWidth = Game.instance.canvasWidth;
@@ -56,6 +58,7 @@ class UI {
         this.crateIcon.draw();
         this.asteroidIcon.draw();
         this.goButton.draw();
+        this.rocketIcon.draw();
         this.laserButton.draw();
 
         context2dCtx.font = "40px Nasalization";
@@ -63,6 +66,7 @@ class UI {
         context2dCtx.textAlign = "left";
         context2dCtx.fillText("x" + this.numCratesCollected, 80, 55);
         context2dCtx.fillText("x" + this.numAsteroidsCollidedWith, 80, 110);
+        context2dCtx.fillText("x" + this.numRocketsHit, 80, 165);
 
         context2dCtx.textAlign = "right";
         context2dCtx.fillText("Score: " + this.calculateScore(), canvasWidth - 100, 55);
@@ -75,9 +79,10 @@ class UI {
     }
 
     calculateScore() {
-        var score = 0
-        score += this.numCratesCollected * 50
-        score -= this.numAsteroidsCollidedWith * 20
-        return score
+        var score = 0;
+        score += this.numCratesCollected * 50;
+        score += this.numRocketsHit * 300;
+        score -= this.numAsteroidsCollidedWith * 20;
+        return score;
     }
 }

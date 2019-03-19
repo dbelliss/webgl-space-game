@@ -29,8 +29,8 @@
 
 ## 0.0.5
 * Restructuring files
-* Adding skybox using simple cube method
-* Optimizing rendering to only render objects that are in the direction the camera is looking
+* Adding skybox using simple cube metho
+d* Optimizing rendering to only render objects that are in the direction the camera is looking
 * Crate texture is now 512x512 to enable mipmaps
 
 ## 0.0.5r1
@@ -54,3 +54,7 @@
 ## 0.0.9r1
 * Resizing canvases
 * Fixing bug with touch controls not preventing default actions, and movement button being detected as a normal touch
+
+## 0.0.10
+* Adding simple enemy AI that moves in a circle
+* Able to hit enemy rockets for points

@@ -16,6 +16,7 @@ class GameObject {
         this.isDestroyed = false; // If this is true, object will be destroyed on next fixedUpdate
         this.epsilon = .01
         this.spatialHashBuckets = []
+        this.isActive = true;
     }
 
     /**
