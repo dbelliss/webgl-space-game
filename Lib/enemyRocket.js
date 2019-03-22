@@ -7,8 +7,7 @@
 class EnemyRocket extends Rocket {
     constructor(_name, position, renderData) {
         super(_name, position, renderData);
-        this.tag = "Enemy"
-        this.isStunned = false;
+        this.tag = "Enemy";
     }
 
     /**

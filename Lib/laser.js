@@ -31,23 +31,7 @@ class Laser extends MeshObject{
     }
 
     onCollisionEnter(other) {
-        if (other.tag == "Enemy") {
-            console.log("Laser hit enemy")
-            Game.instance.audioManager.playSound(SoundsEnum.LASER_HIT);
-            Game.instance.audioManager.playSound(SoundsEnum.POWER_DOWN);
-            if (!other.isStunned) {
-                Game.instance.hitRocket(); // Add to score
-            }
-            other.isStunned = true;
-            this.isDestroyed = true;
-        }
-        else if (other.tag == "Asteroid") {
-            console.log("Laser hit asteroid");
-            Game.instance.audioManager.playSound(SoundsEnum.LASER_HIT);
-            this.isDestroyed = true
-        }
-        else if (other.tag == "Crate") {
-            console.log("Laser hit crate");
+        if (other.tag == "Asteroid" || other.tag == "Crate" || other.tag == "Enemy") {
             Game.instance.audioManager.playSound(SoundsEnum.LASER_HIT);
             this.isDestroyed = true
         }

@@ -25,13 +25,13 @@ class Asteroid extends MeshObject{
         glMatrix.quat.fromEuler(this.deltaRotationQuat, deltaRotation.x, deltaRotation.y, deltaRotation.z);
 
         // Set size of asteroid
-        this.transform.scale = new Vector3(.05, .05, .04)
+        this.transform.scale = new Vector3(.05, .05, .02)
         var scaleFactor = 1 + Math.floor(Math.random() * 8)
         this.mass = (4/3) * Math.PI * (Math.pow(scaleFactor - .99, 3))
         this.transform.scale.scale(scaleFactor)
 
         // Add sphere collider
-        this.collider = new SphereCollider(this.transform.position, scaleFactor, scaleFactor, scaleFactor)
+        this.collider = new SphereCollider(this.transform.position, scaleFactor)
     }
 
     onCollisionEnter(other) {
@@ -43,7 +43,7 @@ class Asteroid extends MeshObject{
             forceDir.scale(100)
             this.addForce(forceDir)
         }
-        if (other.tag == "Asteroid") {
+        if (other.tag == "Asteroid" || other.tag == "Enemy") {
             var forceDir = this.transform.position.difference(other.transform.position)
             forceDir.scale(other.mass)
             this.addForce(forceDir)
