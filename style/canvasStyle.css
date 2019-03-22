@@ -7,6 +7,7 @@
     height: 720px;
     width: 1280px;
     background-color: white;
+
 }
 
 canvas {
@@ -39,4 +40,63 @@ h1, p, li {
 
 ul {
   list-style-type: none;
+}
+
+
+
+.startImage {
+  width: 100%;
+  height: 100%;
+}
+
+.buttonDiv {
+    z-index: 5;
+    position: relative;
+    text-align: center;
+    color: white;
+    height: 100%;
+}
+
+.startButton {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    font-size: 50px;
+    visibility: hidden;
+}
+
+.title {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size:50px;
+}
+
+.instructions{
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#myProgress {
+ position: absolute;
+    top: 40%;
+    left: 25%;
+    transform: translate(0%, -50%);
+  width: 50%;
+  background-color: grey;
+}
+
+#myBar {
+  width: 1%;
+  height: 30px;
+  background-color: white;
+}
+
+p,ul {
+    width: 70%;
+        margin: auto;
 }
