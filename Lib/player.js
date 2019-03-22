@@ -8,9 +8,10 @@ class Player extends Rocket {
     constructor(_name, position, renderData) {
         super(_name, position, renderData);
         this.tag = "Player"
-        this.thrust = 1
+        this.thrust = 20
         this.maxSpeed = 50
         this.turnPower = -1
+        this.mass = 20;
     }
 
     /**
@@ -53,6 +54,18 @@ class Player extends Rocket {
             var forceDir = this.transform.position.difference(other.transform.position)
             forceDir.scale(2)
             this.addForce(forceDir)
+        }
+        if (other.tag == "Enemy") {
+            if (this.iFrames >= 0) {
+                return
+            }
+            Camera.instance.shake(.5);
+            this.velocity.scale(0);
+            var forceDir = this.transform.position.difference(other.transform.position)
+            forceDir.scale(2)
+            this.addForce(forceDir)
+            this.iFrames = 1
+            Game.instance.audioManager.playSound(SoundsEnum.CRASH);
         }
     }
 

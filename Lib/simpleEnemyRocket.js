@@ -27,6 +27,25 @@ class SimpleEnemyRocket extends EnemyRocket {
     }
 
     onCollisionEnter(other) {
+        if (other.tag == "Asteroid" || other.tag == "Player") {
+            this.isStunned = true;
+            var forceDir = this.transform.position.difference(other.transform.position)
+            forceDir.scale(other.mass)
+            this.addForce(forceDir)
+        }
+        if (other.tag == "Crate") {
+            other.isDestroyed = true;
+        }
+        if (other.tag == "Laser") {
+            Game.instance.audioManager.playSound(SoundsEnum.POWER_DOWN);
+            if (!this.isStunned) {
+                Game.instance.hitRocket(); // Add to score
+            }
+            this.isStunned = true;
+            var forceDir = this.transform.position.difference(other.transform.position)
+            forceDir.scale(5)
+            this.addForce(forceDir)
+        }
 
     }
 }

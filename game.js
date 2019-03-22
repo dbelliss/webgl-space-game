@@ -149,7 +149,7 @@ class Game {
             requestAnimationFrame(render.bind(this));
         };
         requestAnimationFrame(render.bind(this));
-        this.beginFixedUpdateLoop();
+        this.beginFixedUpdateLoop(this);
     }
 
     sleep(ms) {
@@ -162,45 +162,54 @@ class Game {
                     Math.abs(this.player.transform.position.z) > this.fieldSize / 1.5);
     }
 
-    async beginFixedUpdateLoop() {
+    async beginFixedUpdateLoop(game) {
         var prevTime = performance.now() / 1000; // Get seconds
         var curTime = performance.now() / 1000;
         var deltaTime = 0
         var updateNum = 0
         this.wasPlayerOutOfBounds = false
-        var activeGameObjects = this.activeGameObjects
+        var activeGameObjects = game.activeGameObjects
+        var fieldSize = game.fieldSize;
         while(true) {
             curTime = performance.now() / 1000;
             deltaTime = curTime - prevTime;
             prevTime = curTime;
 
-            this.skybox.transform.position = this.player.transform.position
-            if (this.wasPlayerOutOfBounds && !this.isPlayerOutOfBounds()) {
-                this.updateHUD()
+            game.skybox.transform.position = game.player.transform.position
+            if (game.wasPlayerOutOfBounds && !game.isPlayerOutOfBounds()) {
+                game.ui.updateHUD()
             }
 
-            if (!this.wasPlayerOutOfBounds && this.isPlayerOutOfBounds()) {
-                this.updateHUD()
+            if (!game.wasPlayerOutOfBounds && game.isPlayerOutOfBounds()) {
+                game.ui.updateHUD()
             }
 
-            this.wasPlayerOutOfBounds = this.isPlayerOutOfBounds()
+            game.wasPlayerOutOfBounds = game.isPlayerOutOfBounds()
 
             Object.keys(activeGameObjects).forEach(function(key,index) {
                 for (var i = 0; i < activeGameObjects[key].length; i++) {
-                    if (activeGameObjects[key][i].isDestroyed) {
-                        activeGameObjects[key][i].destroy()
+                    var gameObject = activeGameObjects[key][i];
+                    if (gameObject.tag != "Player" && gameObject.tag != "Skybox" && (Math.abs(gameObject.transform.position.x) > fieldSize ||
+                            Math.abs(gameObject.transform.position.y) > fieldSize ||
+                            Math.abs(gameObject.transform.position.z) > fieldSize)) {
+                        console.log("Destroying ", gameObject);
+                        gameObject.isDestroyed = true;
+                    }
+                    if (gameObject.isDestroyed) {
+                        // call Object destructor and remove from object list
+                        gameObject.destroy()
                         activeGameObjects[key].splice(i,1);
                     }
                     else {
-                        if (activeGameObjects[key][i].isActive) {
-                            activeGameObjects[key][i].fixedUpdate(.02)
+                        if (gameObject.isActive) {
+                            gameObject.fixedUpdate(.02)
                         }
                     }
                 }
             });
 
             // Check for collisions
-            var spatialHash = this.collisionManager.spatialHash
+            var spatialHash = game.collisionManager.spatialHash
             Object.keys(spatialHash).forEach(function(key,index) {
                 var xHash = spatialHash[key]
                 Object.keys(xHash).forEach(function(key,index) {

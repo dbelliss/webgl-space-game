@@ -21,6 +21,7 @@ class Rocket extends MeshObject {
         this.collider = new BoxCollider(this.transform.position, 2, 2, 2)
         this.maxSpeed = 10
         this.drag = .2
+        this.isStunned = false;
     }
 
     /**
