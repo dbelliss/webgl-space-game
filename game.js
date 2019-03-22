@@ -1,10 +1,48 @@
 "use strict";
 
+var loaded = false;
+var asteroidJson = null
+var rocketJson = null
+var laserJson = null
+var elem = document.getElementById("myBar");
+var loadProgress = 0
+var game = null
+var startButton = document.getElementById("startButton");
+var startMenu = document.getElementById("startMenu");
+
+function StartGame() {
+    console.log("Starting game");
+    if (loaded) {
+        startButton.disabled = true;
+        startMenu.style.visibility = "hidden";
+        startButton.style.visibility = "hidden";
+        game.startGame();
+    }
+    else {
+        console.log("But assets have not loaded yet");
+    }
+}
+
+function updateLoadProgress() {
+    loadProgress += 10;
+    elem.style.width = loadProgress + '%';
+    if (loadProgress >= 100) {
+        startButton.disabled = false;
+        startButton.style.visibility = "visible";
+    }
+}
+
 function Initialize() {
     loadJSONResource('./Assets/Models/Asteroid.json', function (modelErr, asteroidObj) {
+        asteroidJson = asteroidObj;
+        updateLoadProgress();
         loadJSONResource('./Assets/Models/rocket.json', function (modelErr, rocketObj) {
+            rocketJson = rocketObj;
+            updateLoadProgress();
             loadJSONResource('./Assets/Models/laser.json', function (modelErr, laserObj) {
-                var game = new Game(asteroidObj, rocketObj, laserObj);
+                laserJson = laserObj;
+                updateLoadProgress();
+                game = new Game(asteroidJson, rocketJson, laserJson);
             });
         });
     });
@@ -41,6 +79,7 @@ class Game {
             console.error('Could not initialize WebGL');
             return;
         }
+        updateLoadProgress();
         var gl = this.gl  // Shorter name
         clearGL(gl);
 
@@ -58,6 +97,7 @@ class Game {
 
         // Load all textures
         this.textureLoader = new TextureLoader(gl)
+        updateLoadProgress();
 
         // Load the program that WebGL will use
         this.textureProgram = new TextureProgram(gl, this.worldMatrix, this.viewMatrix, this.projMatrix, this.canvas.clientWidth / this.canvas.clientHeight)
@@ -65,92 +105,103 @@ class Game {
 
         // Create GameObjects
         this.createPlayer(rocketJson);
+        updateLoadProgress();
         this.createEnemies(50, rocketJson);
-        this.createAsteroids(100, asteroidJson);
-        this.createCrates(500);
+        updateLoadProgress();
+        this.createAsteroids(500, asteroidJson);
+        updateLoadProgress();
+        this.createCrates(1000);
 
         // Initialize Game Managers
         this.touchControlManager = new TouchControlManager();
         this.ui = new UI(document.getElementById('hud'));
         this.collisionManager = new CollisionManager(this.activeGameObjects)
         this.audioManager = new AudioManager();
-        this.audioManager.playSong(SongsEnum.FREEFORM)
+
+        updateLoadProgress();
 
         this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
         this.skybox = new Skybox("Skybox", Vector3.random(0,0), this.textureLoader.getTexture("space"), new Vector3(0,0,0));
+        updateLoadProgress();
+        loaded = true;
+    }
 
+    startGame() {
+        this.audioManager.playSong(SongsEnum.FREEFORM)
+        requestAnimationFrame(this.render.bind(this));
+        this.beginFixedUpdateLoop(this);
+    }
+
+    render () {
         // Render Loop
         var numFrames = 0;
         var theta = 0;
         var phi = 0;
+        var gl = this.gl;
         const asteroids = this.activeGameObjects["Asteroid"]
         const crates = this.activeGameObjects["Crate"]
         const lasers = this.activeGameObjects["Laser"]
         const enemies = this.activeGameObjects["Enemy"]
-        function render () {
-            clearGL(this.gl);
+        clearGL(this.gl);
 
-            this.camera.trackObject(this.player, theta, phi);
+        this.camera.trackObject(this.player, theta, phi);
 
-            //
-            // Draw all game objects
-            //
-            this.textureProgram.updateViewMatrix();
+        //
+        // Draw all game objects
+        //
+        this.textureProgram.updateViewMatrix();
 
-            if (asteroids.length > 0) {
-                var renderDataList = asteroids[0].renderData; // Render data for all asteroids is the same
-                var renderData = renderDataList[0];
-                this.textureProgram.batchDraw(asteroids, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
+        if (asteroids.length > 0) {
+            var renderDataList = asteroids[0].renderData; // Render data for all asteroids is the same
+            var renderData = renderDataList[0];
+            this.textureProgram.batchDraw(asteroids, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
+        }
+
+        if (crates.length  > 0) {
+            var renderDataList = crates[0].renderData; // Render data for all crates is the same
+            var renderData = renderDataList[0];
+            this.textureProgram.batchDraw(crates, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
+        }
+
+        if (enemies.length > 0) {
+            var renderDataList = enemies[0].renderData
+            for (var j = 0; j < renderDataList.length; j++) {
+                var renderData = renderDataList[j]
+                this.textureProgram.batchDraw(enemies, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
             }
+        }
 
-            if (crates.length  > 0) {
-                var renderDataList = crates[0].renderData; // Render data for all crates is the same
-                var renderData = renderDataList[0];
-                this.textureProgram.batchDraw(crates, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW);
+        if (lasers.length > 0) {
+            var renderDataList = lasers[0].renderData
+            for (var j = 0; j < renderDataList.length; j++) {
+                var renderData = renderDataList[j]
+                this.textureProgram.batchDraw(lasers, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
             }
+        }
 
-            if (enemies.length > 0) {
-                var renderDataList = enemies[0].renderData
-                for (var j = 0; j < renderDataList.length; j++) {
-                    var renderData = renderDataList[j]
-                    this.textureProgram.batchDraw(enemies, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
-                }
+        if (this.player) {
+            var gameObject = this.player
+            var renderDataList = gameObject.renderData
+            for (var j = 0; j < renderDataList.length; j++) {
+                var renderData = renderDataList[j]
+                this.textureProgram.drawMesh(renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW, gameObject.transform)
             }
+        }
 
-            if (lasers.length > 0) {
-                var renderDataList = lasers[0].renderData
-                for (var j = 0; j < renderDataList.length; j++) {
-                    var renderData = renderDataList[j]
-                    this.textureProgram.batchDraw(lasers, renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW)
-                }
+        if (this.skybox) {
+            disableCulling(this.gl);
+            var gameObject = this.skybox
+            var renderDataList = gameObject.renderData
+            for (var j = 0; j < renderDataList.length; j++) {
+                var renderData = renderDataList[j]
+                this.textureProgram.drawMesh(renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW, gameObject.transform)
             }
+            enableCulling(this.gl);
+        }
 
-            if (this.player) {
-                var gameObject = this.player
-                var renderDataList = gameObject.renderData
-                for (var j = 0; j < renderDataList.length; j++) {
-                    var renderData = renderDataList[j]
-                    this.textureProgram.drawMesh(renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW, gameObject.transform)
-                }
-            }
-
-            if (this.skybox) {
-                disableCulling(this.gl);
-                var gameObject = this.skybox
-                var renderDataList = gameObject.renderData
-                for (var j = 0; j < renderDataList.length; j++) {
-                    var renderData = renderDataList[j]
-                    this.textureProgram.drawMesh(renderData.vertices, renderData.indices, renderData.textureIndices, renderData.texture, gl.DYNAMIC_DRAW, gameObject.transform)
-                }
-                enableCulling(this.gl);
-            }
-
-            numFrames++;
-            requestAnimationFrame(render.bind(this));
-        };
-        requestAnimationFrame(render.bind(this));
-        this.beginFixedUpdateLoop(this);
-    }
+        numFrames++;
+        requestAnimationFrame(this.render.bind(this));
+    };
 
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));

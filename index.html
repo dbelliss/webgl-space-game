@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Spacefreight Crates and Co.</title>
+    <title>Spacefreight Crates Company</title>
     <link rel="stylesheet" type="text/css" href="./style/canvasStyle.css">
     <link rel="stylesheet" type="text/css" href="./style/hudStyle.css">
 
@@ -23,7 +23,19 @@
       </canvas>
       <canvas id="hud" class="canvas2d" width="1280" height="720">
       </canvas>
+
+      <div class="buttonDiv" id="startMenu">
+        <img class="startImage" src="./Assets/Textures/simpleSky.png" alt="Space">
+        <h1 class="title"> Spacefreight Crates Company </h1>
+        <div id="myProgress">
+          <div id="myBar"></div>
+        </div>
+        <h2 class="instructions"> See below for controls and how to play</h2>
+        <button class="startButton" type="button" id="startButton" onclick="StartGame()">Start!</button>
+      </div>
+
     </div>
+
     <br/>
     <script src="./Lib/gl-matrix.js"></script>
     <script src="./Lib/lib.js"></script>
@@ -62,7 +74,38 @@
     <script src="./Lib/ui.js"></script>
     <script src="./Lib/collisionManager.js"></script>
     <div id="gameInfo">
-      <div id="options">
+      <div id="intro">
+        <h1>
+          Welcome to Spacefreight Crates Company!
+        </h1>
+        <p>
+          Spacefreight Crates Co. is the galaxy's number 1 cargo retrieval company. Lost your goods in a dangerous asteroid field? No problem! SCC's highly trained drivers will have no problem recovering your cargo. And you just became one of those drivers!
+          <br>
+          <br>
+          For your first day on the job as a driver, you travel to the Asteroid Belt 55C to recover some cargo crates.
+          <br>
+          Some things to remember from your training:
+          <br>
+          <br>
+        </p>
+        <ul>
+          <li>1. Collecting more crates lets you collect a bigger paycheck!</li>
+          <li>2. Hitting anything other than crates will damage the ship, and repairs come straight out of your paycheck!</li>
+          <li>3. Stunning any illegal crate collectors will allow you to collect their bounty, for even more pay!</li>
+          <li>4. The space-proof crates can only withstand the vacuum of space for a short time, so you only have a few minutes to gather as much as you can!</li>
+        </ul>
+      </div>
+      <div id="controls">
+        <h1>
+          Controls
+        </h1>
+        <ul>
+          <li>WASD to change your movement direction</li>
+          <li>Spacebar to move forward (Release to slow down)</li>
+          <li>F to fire your laser</li>
+        </ul>
+      </div>
+       <div id="options">
         <h1>
           Options
         </h1>
@@ -80,30 +123,6 @@
             <input type="range" min="0" max="100" value="100" class="slider" id="sfxVolumeSlider">
           </div>
         </div>
-      </div>
-      <div id="intro">
-        <h1>
-          Welcome to Crate Collectors Inc.!
-        </h1>
-        <p>
-          For your first day on the job as a collector, you travel to the asteroid sector to claim some loot.
-          <br>
-          Just don't hit any asteroids, or else you'll damage the cargo, and hopefully no raiders come by...
-          <br>
-          Remember, the more crates you collect, the more you get paid!
-        </p>
-      </div>
-      <div id="controls">
-        <h1>
-          Controls
-        </h1>
-        <p>
-          <ul>
-            <li>WASD to change your movement direction</li>
-            <li>Spacebar to move forward</li>
-            <li>F to fire your laser</li>
-          </ul>
-        </p>
       </div>
     </div>
 
