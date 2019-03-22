@@ -9,18 +9,31 @@ var loadProgress = 0
 var game = null
 var startButton = document.getElementById("startButton");
 var startMenu = document.getElementById("startMenu");
+var restartMenu = document.getElementById("restartMenu");
+var finalScoreText = document.getElementById("finalScoreText")
+var roundTime = 90;
+var numCrates = 1000;
+var numAsteroids = 500;
+var numSimpleEnemies = 50;
+var fieldSize = 500;
 
 function StartGame() {
     console.log("Starting game");
     if (loaded) {
         startButton.disabled = true;
-        startMenu.style.visibility = "hidden";
-        startButton.style.visibility = "hidden";
+        startMenu.style.display = "none";
+        startButton.style.display = "hidden";
+        startButton.disabled = true;
         game.startGame();
     }
     else {
         console.log("But assets have not loaded yet");
     }
+}
+
+function RestartGame() {
+        restartMenu.style.visibility = "hidden";
+        game.restart();
 }
 
 function updateLoadProgress() {
@@ -49,24 +62,96 @@ function Initialize() {
 }
 
 class Game {
+
+    /**
+     * Initializes world, view, and projection matrices
+     */
     initializeMatrices() {
         this.worldMatrix = new Float32Array(16);
         this.viewMatrix = new Float32Array(16);
         this.projMatrix = new Float32Array(16);
     }
 
+    /**
+     * Restarts the round
+     * Creates new game objects, spatial hash, and resets score
+     * When the timer gets below 0, the score screen will appear
+     * This function should be called at the start of every new round
+     */
+    restart() {
+        console.log("Restarting");
+        this.ui.numAsteroidsCollidedWith = 0;
+        this.ui.numCratesCollected = 0;
+        this.ui.numRocketsHit = 0;
+        this.createField(); // Creates game objects
+    }
+
+    /**
+     * Creates game objects and initializes spatial hash for collisions
+     */
+    createField() {
+        // Create list of all active GameObjects to act on during FixedUpdate and Render
+        // Keep similar objects in the same bucket to optimize render calls
+        this.activeGameObjects["Player"] = []
+        this.activeGameObjects["Enemy"] = []
+        this.activeGameObjects["Asteroid"] = []
+        this.activeGameObjects["Crate"] = []
+        this.activeGameObjects["Laser"] = []
+
+        this.createPlayer(rocketJson);
+        this.createEnemies(numSimpleEnemies, rocketJson);
+        this.createAsteroids(numAsteroids, asteroidJson);
+        this.createCrates(numCrates);
+        this.collisionManager.generateSpatialHash();
+        this.startRound()
+    }
+
+    /**
+     * Starts the game timer
+     * When the timer gets below 0, the score screen will appear
+     * This function should be called at the start of every new round
+     */
+    startRound() {
+        this.timeLeft = roundTime;
+        this.isRoundActive = true;
+        this.ui.updateHUD();
+        var timer = setInterval(function() {
+          // If the count down is finished, write some text
+          if (this.timeLeft <= 0) {
+            clearInterval(timer); // Stop calling this interval function
+            this.endRound(); // Destroy crates and show score
+          }
+          else {
+            this.timeLeft -= 1; // Change the displayed time
+          }
+          this.ui.updateHUD();
+        }.bind(this), 1000);
+    }
+
+    /**
+     * Ends the round by destroying all crates and displaying score screen
+     * When the timer gets below 0, the score screen will appear
+     * This function should be called at the start of every new round
+     */
+    endRound() {
+        this.activeGameObjects["Crate"] = []
+        restartMenu.style.visibility = "visible";
+        finalScoreText.textContent = "You scored: " + this.ui.calculateScore();
+        this.isRoundActive = false;
+    }
+
     constructor(asteroidJson, rocketJson, laserJson) {
         Game.instance = this
-
+        this.isRoundActive = false;
         this.laserJson = laserJson;
-        this.fieldSize = 500
+        this.fieldSize = fieldSize;
 
         // Prevent spacebar from scrolling down the page
         window.onkeydown = function(e) {
             return !(e.keyCode == 32);
         };
 
-        // Create WebGL object
+        // Get the canvas that will be used by WebGL
         var canvas = document.getElementById('game-surface');
         this.canvas = canvas;
 
@@ -74,69 +159,66 @@ class Game {
         this.canvasHeight = canvas.clientHeight;
         this.canvasWidth = canvas.clientWidth;
 
+        // Initialize WebGL canvas
         this.gl = InitializeGL(canvas);
         if (this.gl == undefined) {
             console.error('Could not initialize WebGL');
             return;
         }
         updateLoadProgress();
-        var gl = this.gl  // Shorter name
-        clearGL(gl);
+        clearGL(this.gl);
 
         // Initialize world, view, and proj matrixes
         this.initializeMatrices();
 
-        // Create list of all active GameObjects to act on during FixedUpdate and Render
-        // Keep similar objects in the same bucket to optimize render calls
-        this.activeGameObjects = {}
-        this.activeGameObjects["Player"] = []
-        this.activeGameObjects["Enemy"] = []
-        this.activeGameObjects["Asteroid"] = []
-        this.activeGameObjects["Crate"] = []
-        this.activeGameObjects["Laser"] = []
-
         // Load all textures
-        this.textureLoader = new TextureLoader(gl)
+        this.textureLoader = new TextureLoader(this.gl)
         updateLoadProgress();
 
         // Load the program that WebGL will use
-        this.textureProgram = new TextureProgram(gl, this.worldMatrix, this.viewMatrix, this.projMatrix, this.canvas.clientWidth / this.canvas.clientHeight)
+        this.textureProgram = new TextureProgram(this.gl, this.worldMatrix, this.viewMatrix, this.projMatrix, this.canvas.clientWidth / this.canvas.clientHeight)
         this.gl.useProgram(this.textureProgram.program);
 
-        // Create GameObjects
-        this.createPlayer(rocketJson);
-        updateLoadProgress();
-        this.createEnemies(50, rocketJson);
-        updateLoadProgress();
-        this.createAsteroids(500, asteroidJson);
-        updateLoadProgress();
-        this.createCrates(1000);
+        this.activeGameObjects = {}
 
         // Initialize Game Managers
         this.touchControlManager = new TouchControlManager();
         this.ui = new UI(document.getElementById('hud'));
+        updateLoadProgress();
         this.collisionManager = new CollisionManager(this.activeGameObjects)
+        updateLoadProgress();
         this.audioManager = new AudioManager();
-
         updateLoadProgress();
 
-        this.camera = new Camera(gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
-        this.skybox = new Skybox("Skybox", Vector3.random(0,0), this.textureLoader.getTexture("space"), new Vector3(0,0,0));
+        // Initialize game objects
+        this.createField(); // Initialize all game objects (Player, enemy, asteroids, crates)
+        updateLoadProgress();
+
+        // Initialize camera and skybox
+        this.camera = new Camera(this.gl, this.worldMatrix, this.viewMatrix, this.projMatrix);
+        this.skybox = new Skybox("Skybox", Vector3.zero(), this.textureLoader.getTexture("space"), new Vector3(0,0,0));
         updateLoadProgress();
         loaded = true;
     }
 
+    /**
+     * Starts the game by beginning the music, render loop, fixed update loop, and round timer
+     * To restart the game, use the restartGame() function
+     */
     startGame() {
         this.audioManager.playSong(SongsEnum.FREEFORM)
         requestAnimationFrame(this.render.bind(this));
         this.beginFixedUpdateLoop(this);
+        this.startRound();
     }
 
+    /**
+     * Renders all game objects, renders the skybox, and updates the camera
+     *
+     * Draws all objects with the same texture in batches to optimize rendering time
+     */
     render () {
-        // Render Loop
         var numFrames = 0;
-        var theta = 0;
-        var phi = 0;
         var gl = this.gl;
         const asteroids = this.activeGameObjects["Asteroid"]
         const crates = this.activeGameObjects["Crate"]
@@ -144,11 +226,7 @@ class Game {
         const enemies = this.activeGameObjects["Enemy"]
         clearGL(this.gl);
 
-        this.camera.trackObject(this.player, theta, phi);
-
-        //
-        // Draw all game objects
-        //
+        this.camera.trackObject(this.player);
         this.textureProgram.updateViewMatrix();
 
         if (asteroids.length > 0) {
@@ -226,7 +304,10 @@ class Game {
             deltaTime = curTime - prevTime;
             prevTime = curTime;
 
-            game.skybox.transform.position = game.player.transform.position
+            if (this.skybox) {
+                game.skybox.transform.position = game.player.transform.position
+            }
+
             if (game.wasPlayerOutOfBounds && !game.isPlayerOutOfBounds()) {
                 game.ui.updateHUD()
             }
@@ -243,7 +324,7 @@ class Game {
                     if (gameObject.tag != "Player" && gameObject.tag != "Skybox" && (Math.abs(gameObject.transform.position.x) > fieldSize ||
                             Math.abs(gameObject.transform.position.y) > fieldSize ||
                             Math.abs(gameObject.transform.position.z) > fieldSize)) {
-                        console.log("Destroying ", gameObject);
+                        console.log("Destroying ", gameObject.tag);
                         gameObject.isDestroyed = true;
                     }
                     if (gameObject.isDestroyed) {

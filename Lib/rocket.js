@@ -53,6 +53,11 @@ class Rocket extends MeshObject {
         glMatrix.quat.fromEuler(deltaXRotation, deltaX, 0, 0);
         glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, deltaXRotation)
 
+        // constantly rotate around local y
+//        var deltaYRotation = new Float32Array(4)
+//        glMatrix.quat.fromEuler(deltaYRotation, 0, 5, 0);
+//         glMatrix.quat.mul(this.transform.rotation, this.transform.rotation, deltaYRotation)
+
         // Get the current move direction by rotating the original moveDir by the current player rotation
         var newMoveDir = new Float32Array(3);
         glMatrix.vec3.transformQuat(newMoveDir, this.originalMoveDir, this.transform.rotation)

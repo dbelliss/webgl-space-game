@@ -8,11 +8,10 @@ class CollisionManager {
         this.spatialHash = {}
         this.cellSize = 20
         this.activeGameObjects = gameObjectList;
-        this.generateSpatialHash()
     }
 
-
     generateSpatialHash() {
+        this.spatialHash = {}
         this.cellSize = 20
         var cellSize = this.cellSize
         var activeGameObjects = this.activeGameObjects
