@@ -24,14 +24,19 @@
       <canvas id="hud" class="canvas2d" width="1280" height="720">
       </canvas>
 
-      <div class="buttonDiv" id="startMenu">
+      <div id="startMenu" class="menu">
         <img class="startImage" src="./Assets/Textures/simpleSky.png" alt="Space">
         <h1 class="title"> Spacefreight Crates Company </h1>
         <div id="myProgress">
           <div id="myBar"></div>
         </div>
         <h2 class="instructions"> See below for controls and how to play</h2>
-        <button class="startButton" type="button" id="startButton" onclick="StartGame()">Start!</button>
+        <button class="startButton" id="startButton" type="button" onclick="StartGame()">Start!</button>
+      </div>
+
+      <div id="restartMenu" class="menu">
+        <h1 id="finalScoreText" class="title"> You scored: 0</h1>
+        <button class="startButton" type="button" id="restartButton" onclick="RestartGame()">Try again!</button>
       </div>
 
     </div>

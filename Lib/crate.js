@@ -26,7 +26,7 @@ class Crate extends GameObject{
     }
 
     onCollisionEnter(other) {
-        if (other.tag == "Player") {
+        if (other.tag == "Player" && Game.instance.isRoundActive) {
             this.isDestroyed = true
             console.log("Crate!");
             Game.instance.crateCollected()
