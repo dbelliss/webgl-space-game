@@ -61,3 +61,8 @@
 * Changing asteroid texture
 * Updating HUD icons
 * Objects that leave the play area (other than the player) are destroyed)
+
+## 0.1.0
+* Adding loading system
+* Able to restart game
+* 90 seconds per game
